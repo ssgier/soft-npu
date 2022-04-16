@@ -1,0 +1,63 @@
+{
+  "simulation": {
+    "untilTime": 10.0,
+    "seed": 0,
+    "populationGenerator": "p1000",
+    "channelProjector": "OneToOne"
+  },
+  "nonCoherentStimulator": {
+    "rate": 4.0,
+    "epsp": 3.5
+  },
+  "channelProjectors": {
+    "OneToOne": {
+      "epsp": 1.5
+    }
+  },
+  "populationGenerators": {
+    "p1000": {
+      "inhibitoryConductionDelayDeterministicPart": 3e-3,
+      "inhibitoryConductionDelayRandomPart" : 1e-3,
+      "inhibitorySynapseWeight": 0.5,
+      "excitatorySynapseInitialWeight": 0.2
+    }
+  },
+  "dopaminergicModulator": {
+    "releaseBaseRate": 0.8,
+    "releaseFrequency": 4
+  },
+  "cycleController": {
+    "dt": 10e-4
+  },
+  "eventProcessor": {
+    "lookAheadWindow": 20e-3,
+    "subBufferReserveSlots": 100000
+  },
+  "synapseParams": {
+    "stdpTimeConstant": 2e-3,
+    "stdpCutOffTime": 20e-3,
+    "stdpScaleFactorPotentiation": 0.1,
+    "stdpDepressionVsPotentiationRatio": 1.2,
+    "maxWeight": 0.75,
+    "eligibilityTraceTimeConstant": 1.0,
+    "eligibilityTraceCutOffTimeFactor": 1.5
+  },
+  "neuronParams": {
+    "excitatory": {
+      "timeConstant": 20e-3,
+      "refractoryPeriod": 7e-3,
+      "thresholdVoltage": 1.0,
+      "resetVoltage": 0.0,
+      "voltageFloor": -1.0,
+      "isInhibitory": false
+    },
+    "inhibitory": {
+      "timeConstant": 5e-3,
+      "refractoryPeriod": 3e-3,
+      "thresholdVoltage": 0.8,
+      "resetVoltage": 0.0,
+      "voltageFloor": -0.0,
+      "isInhibitory": true
+    }
+  }
+}

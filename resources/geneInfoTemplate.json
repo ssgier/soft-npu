@@ -1,0 +1,95 @@
+[
+  [
+    [
+      {
+        "id": "nonCoherentStimulator.rate",
+        "minValue": 0.5,
+        "maxValue": 5
+      },
+      {
+        "id": "nonCoherentStimulator.epsp",
+        "minValue": 0.3,
+        "maxValue": 5
+      }
+    ],
+    [
+      {
+        "id": "pocDynamicSimulation.rewardDosage",
+        "minValue": 0.05,
+        "maxValue": 2
+      },
+      {
+        "id": "dopaminergicModulator.releaseBaseRate",
+        "minValue": 0.01,
+        "maxValue": 2
+      },
+      {
+        "id": "synapseParams.stdpDepressionVsPotentiationRatio",
+        "minValue": 1,
+        "maxValue": 2
+      }
+    ],
+    [
+      {
+        "id": "synapseParams.eligibilityTraceTimeConstant",
+        "minValue": 0.1,
+        "maxValue": 1
+      },
+
+
+      {
+        "id": "synapseParams.maxWeight",
+        "minValue": 0.5,
+        "maxValue": 1
+      },
+      {
+        "id": "synapseParams.stdpTimeConstant",
+        "minValue": 0.001,
+        "maxValue": 0.03
+      },
+      {
+        "id": "populationGenerators.pEvo.inhibitorySynapseWeight",
+        "minValue": 0.1,
+        "maxValue": 2
+      },
+
+      {
+        "id": "synapseParams.stdpCutOffTime",
+        "minValue": 0.02,
+        "maxValue": 0.05
+      }
+    ]
+  ],
+  [
+    {
+      "id": "neuronParams.excitatory.timeConstant",
+      "minValue": 0.001,
+      "maxValue": 0.03
+    },
+    {
+      "id": "neuronParams.excitatory.refractoryPeriod",
+      "minValue": 0.001,
+      "maxValue": 0.015
+    },
+    {
+      "id": "neuronParams.excitatory.voltageFloor",
+      "minValue": -1.5,
+      "maxValue": 0
+    },
+    {
+      "id": "neuronParams.inhibitory.timeConstant",
+      "minValue": 0.001,
+      "maxValue": 0.01
+    },
+    {
+      "id": "neuronParams.inhibitory.refractoryPeriod",
+      "minValue": 0.001,
+      "maxValue": 0.01
+    }
+  ],
+  {
+    "id": "populationGenerators.pEvo.targetNumMotorNeurons",
+    "minValue": 8,
+    "maxValue": 200
+  }
+]

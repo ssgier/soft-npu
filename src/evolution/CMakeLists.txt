@@ -1,0 +1,13 @@
+set(SOURCE
+        ${SOURCE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/Evolution.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/TerminationReason.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Candidate.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/GeneOperationUtils.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Gene.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/GeneElement.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/RealNumberGeneElement.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/BooleanGeneElement.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/IntegerGeneElement.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/EvolutionParams.cpp
+        PARENT_SCOPE)

@@ -1,0 +1,30 @@
+
+add_subdirectory(core)
+add_subdirectory(neuro)
+add_subdirectory(params)
+add_subdirectory(genesis)
+add_subdirectory(experiments)
+add_subdirectory(evolution)
+
+macro(add_link_includes_for_target _target_name)
+    target_link_libraries(${_target_name} PRIVATE nlohmann_json::nlohmann_json libcmaes::cmaes
+            TBB::tbb)
+    target_include_directories(${_target_name} PRIVATE json_INCLUDE_DIR)
+    target_include_directories(${_target_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_include_directories(${_target_name} PRIVATE ${Boost_INCLUDE_DIR})
+    target_include_directories(${_target_name} PRIVATE ${libcmaes_INCLUDE_DIR})
+endmacro()
+
+macro(add_link_include_executable _target_name)
+    add_executable(${_target_name} ${CMAKE_CURRENT_SOURCE_DIR}/${_target_name}.cpp)
+    target_link_libraries(${_target_name} PRIVATE soft_npu)
+    add_link_includes_for_target(${_target_name})
+endmacro()
+
+add_library(soft_npu ${SOURCE})
+add_link_includes_for_target(soft_npu)
+add_link_include_executable(nsim)
+add_link_include_executable(optim)
+add_link_include_executable(evo)
+add_link_include_executable(evoCalibrate)
+add_link_include_executable(benchmark)

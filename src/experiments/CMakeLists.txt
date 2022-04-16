@@ -1,0 +1,11 @@
+set(SOURCE
+        ${SOURCE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/POCDynamicSimulation.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ExpUtils.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/EnvContext.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/EnvEventFactories.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/EnvEventQueue.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/OptimParamsMapper.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Optimizer.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/EvolutionWrapper.cpp
+        PARENT_SCOPE)

@@ -1,0 +1,15 @@
+set(SOURCE
+        ${SOURCE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/EventProcessor.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/AbstractSimulation.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/StaticInputSimulation.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/NonCoherentStimulator.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ChannelSpikeInfo.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/RewardDoseInfo.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/SimulationResult.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/CycleInputBuffer.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/CycleOutputBuffer.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/CycleController.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/DAergicModulator.cpp
+        PARENT_SCOPE
+        )

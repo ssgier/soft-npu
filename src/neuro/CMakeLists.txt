@@ -1,0 +1,12 @@
+set(SOURCE
+        ${SOURCE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/Neuron.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Synapse.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Population.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ChannelProjectorFactory.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ChannelProjector.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/OneToOneChannelProjector.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/OneToManyChannelProjector.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/TopographicChannelProjector.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ExplicitChannelProjector.cpp
+        PARENT_SCOPE)

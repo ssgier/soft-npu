@@ -1,0 +1,12 @@
+set(SOURCE
+        ${SOURCE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/TrivialNeuroComponentsFactory.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/PopulationGeneratorFactory.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/SingleNeuronPopulationGenerator.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/PopulationGeneratorDetailedParams.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/PopulationGeneratorP1000.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/CloningPopulationGenerator.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/PopulationGeneratorR2DSheet.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/PopulationGeneratorEvo.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/SynapseInjectionR2DSheet.cpp
+        PARENT_SCOPE)
