@@ -2,7 +2,7 @@
 *soft-npu* (software-based neural processing unit) is an event-driven framework for processing dynamics of spiking neural networks (SNNs).
 This project is in early stage of development.
 
-## Key features
+## Key Features
 
 * Event-driven
 * Leaky integrate-and-fire neurons
@@ -18,6 +18,10 @@ Inspiration for this projects originates from two publications by neuroscientist
 * Solving the Distal Reward Problem through Linkage of STDP and Dopamine Signaling [[2]](#2)
 
 The aim is to explore the potential of emerging polychronous groups with R-STDP as a learning mechanism in SNNs.
+
+## Example Spike Raster
+
+![plot](./images/ExampleSpikeRaster.png)
 
 ## Usage
 Below instructions should work on UNIX-based systems. Some dependencies may have to be installed.
