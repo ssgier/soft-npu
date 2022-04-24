@@ -5,6 +5,8 @@
 
 namespace soft_npu {
 
+class NeuroComponentsFactory;
+
 class PopulationGeneratorDetailedParams : public PopulationGenerator {
 public:
     PopulationGeneratorDetailedParams(
@@ -17,6 +19,11 @@ public:
 private:
     const ParamsType& params;
     RandomEngineType& randomEngine;
+
+    void makeAndSetNeurons(
+            const ParamsType& details,
+            NeuroComponentsFactory&,
+            Population&) const;
 };
 
 }

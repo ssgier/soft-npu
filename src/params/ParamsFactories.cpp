@@ -15,26 +15,25 @@ SynapseParams extractSynapseParams(const ParamsType& params) {
     return synapseParams;
 }
 
-std::shared_ptr<NeuronParams> extractNeuronParams(const ParamsType& params, bool inhibitory) {
-
-    auto innerKey = inhibitory ? "inhibitory" : "excitatory";
+std::shared_ptr<NeuronParams> extractNeuronParams(const ParamsType& params, const std::string& neuronParamsName) {
 
     auto neuronParams = std::make_shared<NeuronParams>();
-    neuronParams->timeConstantInverse = 1 / static_cast<ValueType>(params["neuronParams"][innerKey]["timeConstant"]);
-    neuronParams->refractoryPeriod = params["neuronParams"][innerKey]["refractoryPeriod"];
-    neuronParams->thresholdVoltage = params["neuronParams"][innerKey]["thresholdVoltage"];
-    neuronParams->resetVoltage = params["neuronParams"][innerKey]["resetVoltage"];
-    neuronParams->voltageFloor = params["neuronParams"][innerKey]["voltageFloor"];
-    neuronParams->isInhibitory = params["neuronParams"][innerKey]["isInhibitory"];
+    const auto& neuronParamsDetails = params["neuronParams"][neuronParamsName];
+    neuronParams->timeConstantInverse = 1 / static_cast<ValueType>(neuronParamsDetails["timeConstant"]);
+    neuronParams->refractoryPeriod = neuronParamsDetails["refractoryPeriod"];
+    neuronParams->thresholdVoltage = neuronParamsDetails["thresholdVoltage"];
+    neuronParams->resetVoltage = neuronParamsDetails["resetVoltage"];
+    neuronParams->voltageFloor = neuronParamsDetails["voltageFloor"];
+    neuronParams->isInhibitory = neuronParamsDetails["isInhibitory"];
     return neuronParams;
 }
 
 std::shared_ptr<NeuronParams> extractExcitatoryNeuronParams(const ParamsType& params) {
-    return extractNeuronParams(params, false);
+    return extractNeuronParams(params, "excitatory");
 }
 
 std::shared_ptr<NeuronParams> extractInhibitoryNeuronParams(const ParamsType& params) {
-    return extractNeuronParams(params, true);
+    return extractNeuronParams(params, "inhibitory");
 }
 
 

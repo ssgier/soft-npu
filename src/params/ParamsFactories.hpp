@@ -7,9 +7,8 @@
 namespace soft_npu::ParamsFactories {
 
 SynapseParams extractSynapseParams(const ParamsType& params);
-
+std::shared_ptr<NeuronParams> extractNeuronParams(const ParamsType& params, const std::string& neuronParamsName);
 std::shared_ptr<NeuronParams> extractExcitatoryNeuronParams(const ParamsType& params);
-
 std::shared_ptr<NeuronParams> extractInhibitoryNeuronParams(const ParamsType& params);
 
 }

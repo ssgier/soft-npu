@@ -16,11 +16,11 @@ auto getCustomizedTemplateParams() {
     "neurons": [
         {
             "neuronId": 0,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 1,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         }
     ],
     "synapses": [

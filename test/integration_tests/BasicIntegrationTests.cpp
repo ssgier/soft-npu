@@ -102,7 +102,7 @@ TEST(BasicIntegrationTests, LeakyIntegrationVoltageTrajectoryInhibitoryNeuron) {
     "neurons": [
         {
             "neuronId": 0,
-            "isInhibitory": true
+            "neuronParamsName": "inhibitory"
         }
     ],
     "synapses": []
@@ -201,11 +201,11 @@ TEST(BasicIntegrationTests, SimpleSynapticTransmission) {
     "neurons": [
         {
             "neuronId": 0,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 1,
-            "isInhibitory": true
+            "neuronParamsName": "inhibitory"
         }
     ],
     "synapses": [
@@ -252,15 +252,15 @@ TEST(BasicIntegrationTests, TwoCoincidingEPSPs) {
     "neurons": [
         {
             "neuronId": 0,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 1,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 2,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         }
     ],
     "synapses": [
@@ -316,19 +316,19 @@ TEST(BasicIntegrationTests, TwoEPSPsAndOneIPSP) {
     "neurons": [
         {
             "neuronId": 0,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 1,
-            "isInhibitory": true
+            "neuronParamsName": "inhibitory"
         },
         {
             "neuronId": 2,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 3,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         }
     ],
     "synapses": [
@@ -394,11 +394,11 @@ TEST(BasicIntegrationTests, VoltageFloor) {
     "neurons": [
         {
             "neuronId": 0,
-            "isInhibitory": true
+            "neuronParamsName": "inhibitory"
         },
         {
             "neuronId": 1,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         }
     ],
     "synapses": [

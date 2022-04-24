@@ -13,28 +13,59 @@ PopulationGeneratorDetailedParams::PopulationGeneratorDetailedParams(const Param
 
 }
 
-std::unique_ptr<Population> PopulationGeneratorDetailedParams::generatePopulation() {
-
-    auto excitatoryNeuronParams = ParamsFactories::extractExcitatoryNeuronParams(params);
-    auto inhibitoryNeuronParams = ParamsFactories::extractInhibitoryNeuronParams(params);
-
-    TrivialNeuroComponentsFactory factory;
+void PopulationGeneratorDetailedParams::makeAndSetNeurons(
+        const ParamsType& details,
+        NeuroComponentsFactory& factory,
+        Population& population) const {
 
     std::unordered_map<SizeType, Neuron*> neuronsById;
+    std::vector<std::pair<SizeType, SizeType>> inhibitionSourcePairings;
+    std::unordered_map<std::string, std::shared_ptr<const NeuronParams>> neuronParamsByName;
 
-    auto population = std::make_unique<Population>(params);
-    const auto& detailedParams = params["populationGenerators"]["pDetailedParams"];
-
-    for (const auto& neuronJson : detailedParams["neurons"]) {
+    for (const auto& neuronJson : details["neurons"]) {
         SizeType neuronId = neuronJson["neuronId"];
-        bool isInhibitory = neuronJson["isInhibitory"];
+        std::string neuronParamsName = neuronJson["neuronParamsName"];
 
-        auto neuron = factory.makeNeuron(neuronId, isInhibitory ? inhibitoryNeuronParams : excitatoryNeuronParams);
+        auto it = neuronParamsByName.find(neuronParamsName);
+        if (it == neuronParamsByName.end()) {
+            it = neuronParamsByName.emplace(neuronParamsName, ParamsFactories::extractNeuronParams(params, neuronParamsName)).first;
+        }
+
+        auto neuronParams = it->second;
+
+        auto neuron = factory.makeNeuron(neuronId, neuronParams);
+
+        auto sourcesIt = neuronJson.find("continuousInhibitionSourceNeuronIds");
+        if (sourcesIt != neuronJson.end()) {
+            const auto& continuousInhibitionSourceNeuronIds = *sourcesIt;
+
+            std::transform(
+                    continuousInhibitionSourceNeuronIds.cbegin(),
+                    continuousInhibitionSourceNeuronIds.cend(),
+                    std::back_inserter(inhibitionSourcePairings),
+                    [neuronId](SizeType sourceNeuronId) {
+                        return std::make_pair(sourceNeuronId, neuronId);
+                    });
+        }
+
         neuronsById[neuronId] = neuron.get();
-        population->addNeuron(std::move(neuron), Population::defaultLocation);
+        population.addNeuron(std::move(neuron), Population::defaultLocation);
     }
 
-    auto synapseJsons = detailedParams["synapses"];
+    for (const auto& inhibitionSourcePairing : inhibitionSourcePairings) {
+        auto sourceNeuronId = inhibitionSourcePairing.first;
+        auto targetNeuronId = inhibitionSourcePairing.second;
+
+        neuronsById[targetNeuronId]->addContinuousInhibitionSource(neuronsById[sourceNeuronId]);
+    }
+}
+
+void makeAndSetSynapses(
+        const ParamsType& details,
+        NeuroComponentsFactory& factory,
+        Population& population) {
+
+    auto synapseJsons = details["synapses"];
     for (const auto& synapseJson : synapseJsons) {
 
         SizeType preSynapticNeuronId = synapseJson["preSynapticNeuronId"];
@@ -42,25 +73,36 @@ std::unique_ptr<Population> PopulationGeneratorDetailedParams::generatePopulatio
         ValueType initialWeight = synapseJson["initialWeight"];
         TimeType conductionDelay = synapseJson["conductionDelay"];
 
-        auto preSynapticNeuron = neuronsById[preSynapticNeuronId];
-        auto postSynapticNeuron = neuronsById[postSynapticNeuronId];
+        auto& preSynapticNeuron = population.getNeuronById(preSynapticNeuronId);
+        auto& postSynapticNeuron = population.getNeuronById(postSynapticNeuronId);
 
-        bool isInhibitory =  preSynapticNeuron->getNeuronParams()->isInhibitory;
+        bool isInhibitory =  preSynapticNeuron.getNeuronParams()->isInhibitory;
 
         auto synapse = factory.makeSynapse(
-                preSynapticNeuron,
-                postSynapticNeuron,
+                &preSynapticNeuron,
+                &postSynapticNeuron,
                 conductionDelay,
                 initialWeight);
 
-        preSynapticNeuron->addOutboundSynapse(synapse.get());
+        preSynapticNeuron.addOutboundSynapse(synapse.get());
 
         if (isInhibitory) {
-            population->addInhibitorySynapse(std::move(synapse));
+            population.addInhibitorySynapse(std::move(synapse));
         } else {
-            population->addExcitatorySynapse(std::move(synapse));
+            population.addExcitatorySynapse(std::move(synapse));
         }
     }
+}
+
+std::unique_ptr<Population> PopulationGeneratorDetailedParams::generatePopulation() {
+
+    TrivialNeuroComponentsFactory factory;
+
+    auto population = std::make_unique<Population>(params);
+    const auto& detailedParams = params["populationGenerators"]["pDetailedParams"];
+
+    makeAndSetNeurons(detailedParams, factory, *population);
+    makeAndSetSynapses(detailedParams, factory, *population);
 
     population->setChannelProjector(ChannelProjectorFactory::createFromParams(params, randomEngine, *population));
 

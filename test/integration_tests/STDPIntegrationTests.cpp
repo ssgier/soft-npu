@@ -16,11 +16,11 @@ TEST(STDPIntegrationTests, SimplePotentiation) {
     "neurons": [
         {
             "neuronId": 0,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 1,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         }
     ],
     "synapses": [
@@ -71,11 +71,11 @@ TEST(STDPIntegrationTests, PostSynapticSpikeFollowedByTwoPreSynapticSpikes) {
     "neurons": [
         {
             "neuronId": 0,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 1,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         }
     ],
     "synapses": [
@@ -132,15 +132,15 @@ TEST(STDPIntegrationTests, PotentiationTwoEPSPs) {
     "neurons": [
         {
             "neuronId": 0,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 1,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 2,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         }
     ],
     "synapses": [
@@ -206,15 +206,15 @@ TEST(STDPIntegrationTests, PotentiationTwoEPSPOneWouldBeEnough) {
     "neurons": [
         {
             "neuronId": 0,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 1,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 2,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         }
     ],
     "synapses": [
@@ -280,11 +280,11 @@ TEST(STDPIntegrationTests, PotentiationUpperWeightBoundary) {
     "neurons": [
         {
             "neuronId": 0,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 1,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         }
     ],
     "synapses": [
@@ -327,11 +327,11 @@ TEST(STDPIntegrationTests, SimpleDepression) {
     "neurons": [
         {
             "neuronId": 0,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 1,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         }
     ],
     "synapses": [
@@ -385,11 +385,11 @@ TEST(STDPIntegrationTests, DepressionLowerWeightBound) {
     "neurons": [
         {
             "neuronId": 0,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 1,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         }
     ],
     "synapses": [
@@ -430,11 +430,11 @@ auto populationJsonText = R"(
     "neurons": [
         {
             "neuronId": 0,
-            "isInhibitory": true
+            "neuronParamsName": "inhibitory"
         },
         {
             "neuronId": 1,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         }
     ],
     "synapses": [
@@ -494,11 +494,11 @@ TEST(STDPIntegrationTests, STDPJustBeforeCutOffTime) {
     "neurons": [
         {
             "neuronId": 0,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 1,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         }
     ],
     "synapses": [
@@ -538,11 +538,11 @@ TEST(STDPIntegrationTests, NoSTDPAfterCutOffTime) {
     "neurons": [
         {
             "neuronId": 0,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 1,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         }
     ],
     "synapses": [
@@ -582,23 +582,23 @@ TEST(STDPIntegrationTests, STDPComplexScenario) {
     "neurons": [
         {
             "neuronId": 0,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 1,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 2,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 3,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 4,
-            "isInhibitory": true
+            "neuronParamsName": "inhibitory"
         }
     ],
     "synapses": [
@@ -681,11 +681,11 @@ TEST(STDPIntegrationTests, PotentiationFromZeroEfficacy) {
     "neurons": [
         {
             "neuronId": 0,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 1,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         }
     ],
     "synapses": [
