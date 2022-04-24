@@ -94,6 +94,22 @@ TEST(BasicIntegrationTests, LeakyIntegrationVoltageTrajectory) {
     ASSERT_FLOAT_EQ(simulationResult.voltageRecordings[1].voltage, 0.4 * exp(- 4e-3 / 20e-3));
 }
 
+TEST(BasicIntegrationTests, EpspOverrideScaling) {
+    auto params = getTemplateParams();
+    (*params)["neuronParams"]["excitatory"]["epspOverrideScaleFactor"] = 0.75;
+    StaticInputSimulation simulation(params);
+
+    simulation.setSpikeTrains({
+        {11e-3, 0},
+    });
+
+    simulation.recordVoltage(0, 11e-3);
+
+    auto simulationResult = simulation.run();
+
+    ASSERT_FLOAT_EQ(simulationResult.voltageRecordings[0].voltage, 0.4 * 0.75);
+}
+
 TEST(BasicIntegrationTests, LeakyIntegrationVoltageTrajectoryInhibitoryNeuron) {
     auto params = getTemplateParams();
 
