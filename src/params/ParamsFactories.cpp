@@ -25,6 +25,12 @@ std::shared_ptr<NeuronParams> extractNeuronParams(const ParamsType& params, cons
     neuronParams->resetVoltage = neuronParamsDetails["resetVoltage"];
     neuronParams->voltageFloor = neuronParamsDetails["voltageFloor"];
     neuronParams->isInhibitory = neuronParamsDetails["isInhibitory"];
+
+    auto it = neuronParamsDetails.find("epspOverrideScaleFactor");
+    if (it != neuronParamsDetails.end()) {
+        neuronParams->epspOverrideScaleFactor = *it;
+    }
+
     return neuronParams;
 }
 

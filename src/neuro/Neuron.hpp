@@ -20,7 +20,8 @@ public:
         if (!isRefractoryPeriod(time)) {
             update(time);
 
-            lastVoltage = std::max(lastVoltage + epsp, neuronParams->voltageFloor);
+            // epsp override scaling is experimental. May be refined later.
+            lastVoltage = std::max(lastVoltage + epsp * neuronParams->epspOverrideScaleFactor, neuronParams->voltageFloor);
 
             auto testVoltage = lastVoltage;
             if (!continuousInhibitionSources.empty()) {
