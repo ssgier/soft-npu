@@ -106,6 +106,14 @@ auto getTemplateParams() {
             "resetVoltage": 0.0,
             "voltageFloor": 0.0,
             "isInhibitory": true
+        },
+        "continuousInhibitionSource": {
+            "timeConstant": 5e-3,
+            "refractoryPeriod": 0e-3,
+            "thresholdVoltage": 1.0,
+            "resetVoltage": 0.0,
+            "voltageFloor": 0.0,
+            "isInhibitory": true
         }
     },
     "expMetricsManager": {

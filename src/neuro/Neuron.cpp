@@ -28,6 +28,10 @@ void Neuron::addOutboundSynapse(Synapse* synapse) {
     outboundSynapses.push_back(synapse);
 }
 
+void Neuron::addContinuousInhibitionSource(Neuron * source) {
+    continuousInhibitionSources.push_back(source);
+}
+
 void Neuron::processInboundOnSpike(const CycleContext& cycleContext) {
     for (const auto& synapticTransmissionInfo : synapticTransmissionSTDPBuffer) {
         TimeType tPostMinusPre = cycleContext.time - synapticTransmissionInfo.transmissionTime;

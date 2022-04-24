@@ -6,6 +6,7 @@
 #include <vector>
 #include <boost/core/noncopyable.hpp>
 
+
 namespace soft_npu {
 
 struct Synapse;
@@ -15,22 +16,55 @@ public:
     Neuron(SizeType neuronId, std::shared_ptr<const NeuronParams> neuronParams) noexcept;
 
     void produceEPSP(const CycleContext &cycleContext, TimeType time, ValueType epsp) noexcept {
+
         if (!isRefractoryPeriod(time)) {
             update(time);
 
             lastVoltage = std::max(lastVoltage + epsp, neuronParams->voltageFloor);
 
-            if (lastVoltage >= neuronParams->thresholdVoltage) {
+            auto testVoltage = lastVoltage;
+            if (!continuousInhibitionSources.empty()) {
+                ValueType continuousInhibition = 0;
+
+                for (auto source : continuousInhibitionSources) {
+                    source->update(time);
+                    continuousInhibition += source->getMembraneVoltage(time);
+                }
+
+                testVoltage -= continuousInhibition;
+            }
+
+            if (testVoltage >= neuronParams->thresholdVoltage) {
                 fire(cycleContext);
             }
         }
     }
 
     void addOutboundSynapse(Synapse* synapse);
+    void addContinuousInhibitionSource(Neuron * source);
 
     ValueType getMembraneVoltage(TimeType time) const noexcept {
-        TimeType timeSinceLastEvaluation = time - lastTime;
-        return lastVoltage * exp(- timeSinceLastEvaluation * neuronParams->timeConstantInverse);
+
+        if (time == lastTime) {
+            return lastVoltage;
+        } else {
+
+            auto lastSourceSpikeTime = std::accumulate(
+                    continuousInhibitionSources.cbegin(),
+                    continuousInhibitionSources.cend(),
+                    std::numeric_limits<TimeType>::lowest(),
+                    [](TimeType time, const Neuron* source) {
+                        return std::max(source->lastSpikeTime, time);
+                    });
+
+            if (lastSourceSpikeTime < lastTime) {
+                TimeType timeSinceLastEvaluation = time - lastTime;
+                return lastVoltage * exp(- timeSinceLastEvaluation * neuronParams->timeConstantInverse);
+            } else {
+                return neuronParams->resetVoltage;
+            }
+
+        }
     }
 
     SizeType getNeuronId() const noexcept;
@@ -61,6 +95,7 @@ private:
 
     std::vector<SynapticTransmissionInfo> synapticTransmissionSTDPBuffer;
     std::vector<Synapse*> outboundSynapses;
+    std::vector<Neuron*> continuousInhibitionSources;
     std::shared_ptr<const NeuronParams> neuronParams;
 
     const SizeType neuronId;
@@ -83,7 +118,4 @@ private:
 };
 
 }
-
-
-
 

@@ -34,11 +34,11 @@ TEST(PopulationGeneratorTests, CloningPopulationGeneratorTest) {
     "neurons": [
         {
             "neuronId": 0,
-            "isInhibitory": false
+            "neuronParamsName": "excitatory"
         },
         {
             "neuronId": 1,
-            "isInhibitory": true
+            "neuronParamsName": "inhibitory"
         }
     ],
     "synapses": [
