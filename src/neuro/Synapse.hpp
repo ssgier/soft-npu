@@ -5,6 +5,8 @@
 #include <core/CycleContext.hpp>
 #include <core/StaticContext.hpp>
 #include <boost/core/noncopyable.hpp>
+#include <boost/optional.hpp>
+#include "ShortTermPlasticityState.hpp"
 
 namespace soft_npu {
 
@@ -19,6 +21,7 @@ struct Synapse : private boost::noncopyable {
 
     Synapse(const Synapse& other) = delete;
 
+    ShortTermPlasticityState shortTermPlasticityState;
     const Neuron* preSynapticNeuron;
     Neuron* postSynapticNeuron;
     TimeType conductionDelay;

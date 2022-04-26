@@ -2,16 +2,29 @@
 namespace soft_npu::ParamsFactories {
 
 SynapseParams extractSynapseParams(const ParamsType& params) {
+
+    const auto& synapseParamsDetails = params["synapseParams"];
+
     SynapseParams synapseParams;
-    synapseParams.stdpTimeConstantInverse = 1.0 / static_cast<TimeType>(params["synapseParams"]["stdpTimeConstant"]);
-    synapseParams.stdpCutOffTime = params["synapseParams"]["stdpCutOffTime"];
-    synapseParams.stdpScaleFactorPotentiation = params["synapseParams"]["stdpScaleFactorPotentiation"];
-    synapseParams.stdpScaleFactorDepression = synapseParams.stdpScaleFactorPotentiation * static_cast<double>(params["synapseParams"]["stdpDepressionVsPotentiationRatio"]);
-    synapseParams.maxWeight = params["synapseParams"]["maxWeight"];
-    synapseParams.eligibilityTraceTimeConstantInverse = 1.0 / static_cast<TimeType>(params["synapseParams"]["eligibilityTraceTimeConstant"]);
+    synapseParams.stdpTimeConstantInverse = 1.0 / static_cast<TimeType>(synapseParamsDetails["stdpTimeConstant"]);
+    synapseParams.stdpCutOffTime = synapseParamsDetails["stdpCutOffTime"];
+    synapseParams.stdpScaleFactorPotentiation = synapseParamsDetails["stdpScaleFactorPotentiation"];
+    synapseParams.stdpScaleFactorDepression = synapseParams.stdpScaleFactorPotentiation * static_cast<ValueType>(synapseParamsDetails["stdpDepressionVsPotentiationRatio"]);
+    synapseParams.maxWeight = synapseParamsDetails["maxWeight"];
+    synapseParams.eligibilityTraceTimeConstantInverse = 1.0 / static_cast<TimeType>(synapseParamsDetails["eligibilityTraceTimeConstant"]);
     synapseParams.eligibilityTraceCutOffTime =
-            static_cast<TimeType>(params["synapseParams"]["eligibilityTraceCutOffTimeFactor"]) /
+            static_cast<TimeType>(synapseParamsDetails["eligibilityTraceCutOffTimeFactor"]) /
                 synapseParams.eligibilityTraceTimeConstantInverse;
+
+    auto it = synapseParamsDetails.find("shortTermPlasticityParams");
+    if (it != synapseParamsDetails.end()) {
+        synapseParams.shortTermPlasticityParams.emplace();
+        synapseParams.shortTermPlasticityParams->isDepression = (*it)["isDepression"];
+        synapseParams.shortTermPlasticityParams->restingValue = (*it)["restingValue"];
+        synapseParams.shortTermPlasticityParams->changeParameter = (*it)["changeParameter"];
+        synapseParams.shortTermPlasticityParams->tauInverse = 1.0 / static_cast<TimeType>((*it)["timeConstant"]);
+    }
+
     return synapseParams;
 }
 
