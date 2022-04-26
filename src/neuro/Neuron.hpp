@@ -23,7 +23,7 @@ public:
             // epsp override scaling is experimental. May be refined later.
             lastVoltage = std::max(lastVoltage + epsp * neuronParams->epspOverrideScaleFactor, neuronParams->voltageFloor);
 
-            auto testVoltage = lastVoltage;
+            auto compareVoltage = lastVoltage;
             if (!continuousInhibitionSources.empty()) {
                 ValueType continuousInhibition = 0;
 
@@ -32,10 +32,10 @@ public:
                     continuousInhibition += source->getMembraneVoltage(time);
                 }
 
-                testVoltage -= continuousInhibition;
+                compareVoltage -= continuousInhibition;
             }
 
-            if (testVoltage >= neuronParams->thresholdVoltage) {
+            if (compareVoltage >= neuronParams->thresholdVoltage) {
                 fire(cycleContext);
             }
         }

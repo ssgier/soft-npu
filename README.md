@@ -8,6 +8,7 @@ This project is in early stage of development.
 * Leaky integrate-and-fire neurons
 * Conduction delays
 * Spike-timing-dependent plasticity modulated via dopamine-based signaling (R-STDP)
+* Short-term plasticity
 * Json-based configuration
 * Tools for generating network topologies
 * Tools for metaheuristic optimization of parameters
