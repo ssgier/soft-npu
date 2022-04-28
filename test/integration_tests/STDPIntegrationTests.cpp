@@ -714,3 +714,49 @@ TEST(STDPIntegrationTests, PotentiationFromZeroEfficacy) {
     ASSERT_EQ(simulationResult.finalSynapseInfos.size(), 1);
     ASSERT_FLOAT_EQ(simulationResult.finalSynapseInfos[0].weight, 0.1 * exp(- 3e-3/20e-3));
 }
+
+TEST(STDPIntegrationTests, SimultaneousDepressionAndPotentiation) {
+    auto params = getTemplateParams();
+    (*params)["channelProjectors"]["OneToOne"]["epsp"] = 0.9;
+
+    auto populationJsonText = R"(
+{
+    "neurons": [
+        {
+            "neuronId": 0,
+            "neuronParamsName": "excitatory"
+        },
+        {
+            "neuronId": 1,
+            "neuronParamsName": "excitatory"
+        }
+    ],
+    "synapses": [
+        {
+            "preSynapticNeuronId": 0,
+            "postSynapticNeuronId": 1,
+            "initialWeight": 0.5,
+            "conductionDelay": 1e-3
+        }
+    ]
+}
+)";
+
+    (*params)["simulation"]["populationGenerator"] = "pDetailedParams";
+    (*params)["populationGenerators"]["pDetailedParams"] = nlohmann::json::parse(populationJsonText);
+
+    StaticInputSimulation simulation(params);
+
+    simulation.setSpikeTrains({
+        {10e-3, 1},
+        {10e-3, 1},
+        {25e-3, 0},
+        {25e-3, 0},
+        {25.5e-3, 1}
+    });
+
+    auto simulationResult = simulation.run();
+
+    ASSERT_EQ(simulationResult.finalSynapseInfos.size(), 1);
+    ASSERT_FLOAT_EQ(simulationResult.finalSynapseInfos[0].weight, 0.5 + 0.1 - 0.12 * exp(- 16e-3/20e-3));
+}

@@ -10,14 +10,12 @@ namespace soft_npu {
 
 Neuron::Neuron(SizeType neuronId, std::shared_ptr<const NeuronParams> neuronParams) noexcept :
         neuronParams(neuronParams), neuronId(neuronId), lastTime(0), lastVoltage(0),
-        lastSpikeTime(std::numeric_limits<TimeType>::lowest()) {}
+        lastSpikeTime(std::numeric_limits<TimeType>::lowest()),
+        nextToLastSpikeTime(std::numeric_limits<TimeType>::lowest()) {
+}
 
 std::shared_ptr<const NeuronParams> Neuron::getNeuronParams() const noexcept {
     return neuronParams;
-}
-
-TimeType Neuron::getLastSpikeTime() const noexcept {
-    return lastSpikeTime;
 }
 
 SizeType Neuron::getNeuronId() const noexcept {
@@ -34,7 +32,10 @@ void Neuron::addContinuousInhibitionSource(Neuron * source) {
 
 void Neuron::processInboundOnSpike(const CycleContext& cycleContext) {
     for (const auto& synapticTransmissionInfo : synapticTransmissionSTDPBuffer) {
-        TimeType tPostMinusPre = cycleContext.time - synapticTransmissionInfo.transmissionTime;
+
+        TimeType tPostMinusPre = cycleContext.time == synapticTransmissionInfo.transmissionTime ?
+            0.0 : cycleContext.time - synapticTransmissionInfo.transmissionTime;
+
         if (tPostMinusPre < cycleContext.staticContext.synapseParams.stdpCutOffTime) {
             synapticTransmissionInfo.synapse->handleSTDP(cycleContext, tPostMinusPre);
         }
@@ -44,9 +45,7 @@ void Neuron::processInboundOnSpike(const CycleContext& cycleContext) {
 }
 
 void Neuron::registerInboundSynapticTransmission(const CycleContext& cycleContext, Synapse* synapse) {
-    if (lastSpikeTime < cycleContext.time) {
-        synapticTransmissionSTDPBuffer.emplace_back(synapse, cycleContext.time);
-    }
+    synapticTransmissionSTDPBuffer.emplace_back(synapse, cycleContext.time);
 }
 
 void Neuron::processOutboundOnSpike(const CycleContext& cycleContext) {
@@ -67,6 +66,7 @@ void Neuron::fire(const CycleContext& cycleContext) noexcept {
 
     lastVoltage = neuronParams->resetVoltage;
     lastTime = cycleContext.time + neuronParams->refractoryPeriod;
+    nextToLastSpikeTime = lastSpikeTime;
     lastSpikeTime = cycleContext.time;
 
     processInboundOnSpike(cycleContext);

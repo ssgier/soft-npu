@@ -72,7 +72,13 @@ public:
 
     std::shared_ptr<const NeuronParams> getNeuronParams() const noexcept;
 
-    TimeType getLastSpikeTime() const noexcept;
+    TimeType getLastSpikeTime() const noexcept {
+        return lastSpikeTime;
+    }
+
+    TimeType getNextToLastSpikeTime() const noexcept {
+        return nextToLastSpikeTime;
+    }
 
     void registerInboundSynapticTransmission(const CycleContext& cycleContext, Synapse* synapse);
 
@@ -103,6 +109,7 @@ private:
     TimeType lastTime;
     ValueType lastVoltage;
     TimeType lastSpikeTime;
+    TimeType nextToLastSpikeTime;
 
     bool isRefractoryPeriod(TimeType time) const noexcept {
         return time < lastTime;
