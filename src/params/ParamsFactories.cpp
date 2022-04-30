@@ -1,34 +1,35 @@
 #include "ParamsFactories.hpp"
+
 namespace soft_npu::ParamsFactories {
 
-SynapseParams extractSynapseParams(const ParamsType& params) {
+std::shared_ptr<SynapseParams> extractSynapseParams(const ParamsType& params) {
 
     const auto& synapseParamsDetails = params["synapseParams"];
 
-    SynapseParams synapseParams;
+    auto synapseParams = std::make_shared<SynapseParams>();
 
     TimeType stdpTimeConstantRatio = synapseParamsDetails["stdpTimeConstantRatio"];
     TimeType tauPotentiation = synapseParamsDetails["stdpTimeConstantPotentiation"];
     TimeType tauDepression = stdpTimeConstantRatio * tauPotentiation;
-    synapseParams.tauInversePotentiation = 1.0 / tauPotentiation;
-    synapseParams.tauInverseDepression = 1.0 / tauDepression;
+    synapseParams->tauInversePotentiation = 1.0 / tauPotentiation;
+    synapseParams->tauInverseDepression = 1.0 / tauDepression;
 
-    synapseParams.stdpCutOffTime = synapseParamsDetails["stdpCutOffTime"];
-    synapseParams.stdpScaleFactorPotentiation = synapseParamsDetails["stdpScaleFactorPotentiation"];
-    synapseParams.stdpScaleFactorDepression = synapseParams.stdpScaleFactorPotentiation * static_cast<ValueType>(synapseParamsDetails["stdpDepressionVsPotentiationRatio"]);
-    synapseParams.maxWeight = synapseParamsDetails["maxWeight"];
-    synapseParams.eligibilityTraceTimeConstantInverse = 1.0 / static_cast<TimeType>(synapseParamsDetails["eligibilityTraceTimeConstant"]);
-    synapseParams.eligibilityTraceCutOffTime =
+    synapseParams->stdpCutOffTime = synapseParamsDetails["stdpCutOffTime"];
+    synapseParams->stdpScaleFactorPotentiation = synapseParamsDetails["stdpScaleFactorPotentiation"];
+    synapseParams->stdpScaleFactorDepression = synapseParams->stdpScaleFactorPotentiation * static_cast<ValueType>(synapseParamsDetails["stdpDepressionVsPotentiationRatio"]);
+    synapseParams->maxWeight = synapseParamsDetails["maxWeight"];
+    synapseParams->eligibilityTraceTimeConstantInverse = 1.0 / static_cast<TimeType>(synapseParamsDetails["eligibilityTraceTimeConstant"]);
+    synapseParams->eligibilityTraceCutOffTime =
             static_cast<TimeType>(synapseParamsDetails["eligibilityTraceCutOffTimeFactor"]) /
-                synapseParams.eligibilityTraceTimeConstantInverse;
+                synapseParams->eligibilityTraceTimeConstantInverse;
 
     auto it = synapseParamsDetails.find("shortTermPlasticityParams");
     if (it != synapseParamsDetails.end()) {
-        synapseParams.shortTermPlasticityParams.emplace();
-        synapseParams.shortTermPlasticityParams->isDepression = (*it)["isDepression"];
-        synapseParams.shortTermPlasticityParams->restingValue = (*it)["restingValue"];
-        synapseParams.shortTermPlasticityParams->changeParameter = (*it)["changeParameter"];
-        synapseParams.shortTermPlasticityParams->tauInverse = 1.0 / static_cast<TimeType>((*it)["timeConstant"]);
+        synapseParams->shortTermPlasticityParams.emplace();
+        synapseParams->shortTermPlasticityParams->isDepression = (*it)["isDepression"];
+        synapseParams->shortTermPlasticityParams->restingValue = (*it)["restingValue"];
+        synapseParams->shortTermPlasticityParams->changeParameter = (*it)["changeParameter"];
+        synapseParams->shortTermPlasticityParams->tauInverse = 1.0 / static_cast<TimeType>((*it)["timeConstant"]);
     }
 
     return synapseParams;

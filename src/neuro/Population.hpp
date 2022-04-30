@@ -19,9 +19,6 @@ public:
     static constexpr Location defaultLocation = {0, 0};
     using neuron_ptr_const_iterator = std::vector<std::unique_ptr<Neuron>>::const_iterator;
 
-    explicit Population(const ParamsType&);
-    explicit Population(const SynapseParams&);
-
     void onSpike(const CycleContext& cycleContext, const Neuron& neuron) const;
 
     template<typename T>
@@ -53,10 +50,7 @@ public:
     SizeType getPopulationSize() const;
     Location getCellLocation(SizeType neuronId) const;
 
-    const SynapseParams& getSynapseParams() const;
-
 private:
-    SynapseParams synapseParams;
     std::vector<std::unique_ptr<Neuron>> neuronsIndexedById;
     std::vector<Location> locationsIndexedByNeuronId;
     std::vector<std::unique_ptr<Synapse>> excitatorySynapses;

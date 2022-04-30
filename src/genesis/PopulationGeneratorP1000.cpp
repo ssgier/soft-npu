@@ -29,12 +29,13 @@ std::unique_ptr<Population> soft_npu::PopulationGeneratorP1000::generatePopulati
 
     auto excitatoryNeuronParams = ParamsFactories::extractExcitatoryNeuronParams(params);
     auto inhibitoryNeuronParams = ParamsFactories::extractInhibitoryNeuronParams(params);
+    auto synapseParams = ParamsFactories::extractSynapseParams(params);
 
     TrivialNeuroComponentsFactory factory;
 
     std::unordered_map<SizeType, Neuron*> neuronsById;
 
-    auto population = std::make_unique<Population>(params);
+    auto population = std::make_unique<Population>();
 
     for (SizeType neuronId = 0; neuronId < numNeurons; ++neuronId) {
         bool isInhibitory = neuronId >= 800;
@@ -62,6 +63,7 @@ std::unique_ptr<Population> soft_npu::PopulationGeneratorP1000::generatePopulati
                                            std::max(1e-3, uniformDistribution(randomEngine) * maxConductionDelay);
 
                 auto synapse = factory.makeSynapse(
+                        synapseParams,
                         preSynapticNeuron,
                         postSynapticNeuron,
                         conductionDelay,

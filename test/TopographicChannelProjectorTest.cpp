@@ -13,7 +13,7 @@ TEST(TopographicChannelProjectorTest, TwoInputChannelsWithIntersection) {
     auto params = getTemplateParams();
 
     TrivialNeuroComponentsFactory factory;
-    auto population = std::make_shared<Population>(*params);
+    auto population = std::make_shared<Population>();
 
     auto excitatoryNeuronParams = ParamsFactories::extractExcitatoryNeuronParams(*params);
     auto inhibitoryNeuronParams = ParamsFactories::extractInhibitoryNeuronParams(*params);
@@ -54,7 +54,7 @@ TEST(TopographicChannelProjectorTest, TwoOutputChannels) {
     auto params = getTemplateParams();
 
     TrivialNeuroComponentsFactory factory;
-    auto population = std::make_shared<Population>(*params);
+    auto population = std::make_shared<Population>();
 
     auto neuronParams = ParamsFactories::extractExcitatoryNeuronParams(*params);
 

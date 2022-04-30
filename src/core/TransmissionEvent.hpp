@@ -19,13 +19,16 @@ public:
 
         ValueType scaledEpsp = unscaledEpsp;
 
+        // note: avoiding direct check of inhibitory flag via pre-synaptic neuron pointer on the synapse,
+        // because this would lead to a premature load of the synapse in the hot loop, causing a
+        // significant performance penalty.
         bool isExcitatorySynapse = synapse != nullptr && unscaledEpsp >= 0.0;
 
         if (isExcitatorySynapse) {
-            if (cycleContext.staticContext.synapseParams.shortTermPlasticityParams) {
-                synapse->shortTermPlasticityState.update(cycleContext);
+            if (synapse->synapseParams->shortTermPlasticityParams) {
+                synapse->shortTermPlasticityState.update(cycleContext, *synapse->synapseParams);
                 scaledEpsp *= synapse->shortTermPlasticityState.lastValue;
-                synapse->shortTermPlasticityState.onTransmission(cycleContext);
+                synapse->shortTermPlasticityState.onTransmission(cycleContext, *synapse->synapseParams);
             }
 
             targetNeuron.registerInboundSynapticTransmission(cycleContext, synapse);

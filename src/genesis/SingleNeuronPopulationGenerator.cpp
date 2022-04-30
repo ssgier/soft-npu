@@ -15,7 +15,7 @@ std::unique_ptr<Population> SingleNeuronPopulationGenerator::generatePopulation(
 
     std::unique_ptr<NeuroComponentsFactory> factory = std::make_unique<TrivialNeuroComponentsFactory>();
 
-    auto population = std::make_unique<Population>(params);
+    auto population = std::make_unique<Population>();
     population->addNeuron(factory->makeNeuron(0, excitatoryNeuronParams), Population::defaultLocation);
 
     population->setChannelProjector(ChannelProjectorFactory::createFromParams(params, randomEngine, *population));

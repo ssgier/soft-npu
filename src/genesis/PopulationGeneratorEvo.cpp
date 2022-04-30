@@ -14,7 +14,7 @@ PopulationGeneratorEvo::PopulationGeneratorEvo(const ParamsType& params,
 
 std::unique_ptr<Population> PopulationGeneratorEvo::generatePopulation() {
 
-    auto population = std::make_unique<Population>(params);
+    auto population = std::make_unique<Population>();
     auto channelProjector = std::make_unique<ExplicitChannelProjector>();
 
     ValueType channelProjectedEpsp = params["populationGenerators"]["pEvo"]["channelProjectedEpsp"];
@@ -32,6 +32,7 @@ std::unique_ptr<Population> PopulationGeneratorEvo::generatePopulation() {
 
     auto excitatoryNeuronParams = ParamsFactories::extractExcitatoryNeuronParams(params);
     auto inhibitoryNeuronParams = ParamsFactories::extractInhibitoryNeuronParams(params);
+    auto synapseParams = ParamsFactories::extractSynapseParams(params);
 
     TrivialNeuroComponentsFactory factory;
 
@@ -71,6 +72,7 @@ std::unique_ptr<Population> PopulationGeneratorEvo::generatePopulation() {
             TimeType conductionDelay = conductionDelayDistribution(randomEngine);
 
             auto synapse = factory.makeSynapse(
+                    synapseParams,
                     &preSynNeuron,
                     &postSynNeuron,
                     conductionDelay,
@@ -101,6 +103,7 @@ std::unique_ptr<Population> PopulationGeneratorEvo::generatePopulation() {
         TimeType conductionDelay = 0.1e-3;
 
         auto outSynapse = factory.makeSynapse(
+                synapseParams,
                 &motorNeuron,
                 &outInhibitoryNeuron,
                 conductionDelay,
@@ -108,6 +111,7 @@ std::unique_ptr<Population> PopulationGeneratorEvo::generatePopulation() {
                 );
 
         auto inSynapse = factory.makeSynapse(
+                synapseParams,
                 &inInhibitoryNeuron,
                 &motorNeuron,
                 conductionDelay,

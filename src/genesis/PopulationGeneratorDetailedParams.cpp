@@ -60,11 +60,12 @@ void PopulationGeneratorDetailedParams::makeAndSetNeurons(
     }
 }
 
-void makeAndSetSynapses(
+void PopulationGeneratorDetailedParams::makeAndSetSynapses(
         const ParamsType& details,
         NeuroComponentsFactory& factory,
-        Population& population) {
+        Population& population) const {
 
+    auto synapseParams = ParamsFactories::extractSynapseParams(params);
     auto synapseJsons = details["synapses"];
     for (const auto& synapseJson : synapseJsons) {
 
@@ -79,6 +80,7 @@ void makeAndSetSynapses(
         bool isInhibitory =  preSynapticNeuron.getNeuronParams()->isInhibitory;
 
         auto synapse = factory.makeSynapse(
+                synapseParams,
                 &preSynapticNeuron,
                 &postSynapticNeuron,
                 conductionDelay,
@@ -98,7 +100,7 @@ std::unique_ptr<Population> PopulationGeneratorDetailedParams::generatePopulatio
 
     TrivialNeuroComponentsFactory factory;
 
-    auto population = std::make_unique<Population>(params);
+    auto population = std::make_unique<Population>();
     const auto& detailedParams = params["populationGenerators"]["pDetailedParams"];
 
     makeAndSetNeurons(detailedParams, factory, *population);

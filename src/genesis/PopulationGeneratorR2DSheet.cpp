@@ -25,7 +25,7 @@ std::unique_ptr<Population> PopulationGeneratorR2DSheet::generatePopulation() {
 
     std::uniform_real_distribution<ValueType> uniformDistribution;
 
-    auto population = std::make_unique<Population>(params);
+    auto population = std::make_unique<Population>();
 
     for (SizeType neuronId = 0; neuronId < numNeurons; ++ neuronId) {
         bool isInhibitory = neuronId >= (1 - pctInhibitoryNeurons) * numNeurons;
