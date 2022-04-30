@@ -24,6 +24,11 @@ private:
             const ParamsType& details,
             NeuroComponentsFactory&,
             Population&) const;
+
+    void makeAndSetSynapses(
+            const ParamsType& details,
+            NeuroComponentsFactory& factory,
+            Population& population) const;
 };
 
 }

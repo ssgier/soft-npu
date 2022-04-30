@@ -8,11 +8,12 @@ std::unique_ptr<Neuron> TrivialNeuroComponentsFactory::makeNeuron(SizeType neuro
 }
 
 std::unique_ptr<Synapse> TrivialNeuroComponentsFactory::makeSynapse(
+        std::shared_ptr<const SynapseParams> synapseParams,
         const Neuron* preSynapticNeuron,
         Neuron* postSynapticNeuron,
         TimeType conductionDelay,
         ValueType initialWeight) {
-    return std::make_unique<Synapse>(preSynapticNeuron, postSynapticNeuron, conductionDelay, initialWeight);
+    return std::make_unique<Synapse>(synapseParams, preSynapticNeuron, postSynapticNeuron, conductionDelay, initialWeight);
 }
 
 }

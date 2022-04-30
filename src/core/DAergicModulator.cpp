@@ -37,10 +37,9 @@ void DAergicModulator::processCycle(const CycleContext& ctx) {
 }
 
 inline void updateSynapticWeight(
-        const CycleContext& ctx,
         Synapse* synapse,
         ValueType proposedWeightChange) {
-    const auto& synapseParams = ctx.staticContext.synapseParams;
+    const auto& synapseParams = *synapse->synapseParams;
 
     ValueType weightCandidate = synapse->weight + proposedWeightChange;
     ValueType weight = std::max(
@@ -73,7 +72,7 @@ DAergicModulator::processDopamineRelease(const CycleContext& ctx, ValueType dopa
         }
 
         ValueType proposedWeightChange = eligibiliyTrace.updateAndGetIntegralValue(ctx) * dopamineRateToReleaseAt;
-        updateSynapticWeight(ctx, eligibiliyTrace.synapse, proposedWeightChange);
+        updateSynapticWeight(eligibiliyTrace.synapse, proposedWeightChange);
     }
 
     while(!eligibilityTraceBuffer.empty() && eligibilityTraceBuffer.front().expiryTime < ctx.time) {

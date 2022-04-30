@@ -1,6 +1,7 @@
 #include "SynapseInjectionR2DSheet.hpp"
 #include "NeuroComponentsFactory.hpp"
 #include <boost/functional/hash.hpp>
+#include <params/ParamsFactories.hpp>
 #include <unordered_set>
 
 namespace soft_npu::SynapseInjectionR2DSheet {
@@ -36,6 +37,7 @@ Population::Location getTargetLocation(
 }
 
 void doInjectSynapses(
+        std::shared_ptr<const SynapseParams> synapseParams,
         RandomEngineType& randomEngine,
         NeuroComponentsFactory& factory,
         Population& population,
@@ -130,7 +132,7 @@ void doInjectSynapses(
                     TimeType conductionDelay = conductionDelayDeterministicPart +
                             uniformDistribution(randomEngine) * conductionDelayRandomPart;
 
-                    auto synapse = factory.makeSynapse(&sourceNeuron, targetNeuron, conductionDelay, initialWeight);
+                    auto synapse = factory.makeSynapse(synapseParams, &sourceNeuron, targetNeuron, conductionDelay, initialWeight);
 
                     sourceNeuron.addOutboundSynapse(synapse.get());
 
@@ -171,7 +173,10 @@ void injectSynapses(
     SizeType numDistantExcTargets = numTargetsExc * pctExcLongDistanceTargets;
     SizeType numNearbyExcTargets = numTargetsExc - numDistantExcTargets;
 
+    auto synapseParams = ParamsFactories::extractSynapseParams(params);
+
     doInjectSynapses(
+            synapseParams,
             randomEngine,
             factory,
             population,
@@ -185,6 +190,7 @@ void injectSynapses(
             excitatorySynapseInitialWeight);
 
     doInjectSynapses(
+            synapseParams,
             randomEngine,
             factory,
             population,
@@ -198,6 +204,7 @@ void injectSynapses(
             excitatorySynapseInitialWeight);
 
     doInjectSynapses(
+            synapseParams,
             randomEngine,
             factory,
             population,

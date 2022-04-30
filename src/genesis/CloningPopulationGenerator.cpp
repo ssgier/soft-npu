@@ -13,7 +13,7 @@ std::unique_ptr<Population> CloningPopulationGenerator::generatePopulation() {
 
     TrivialNeuroComponentsFactory factory;
 
-    auto population = std::make_unique<Population>(clonee.getSynapseParams());
+    auto population = std::make_unique<Population>();
 
     for (auto cit = clonee.cbeginNeurons(); cit != clonee.cendNeurons(); ++ cit) {
         const Neuron& cloneeNeuron = **cit;
@@ -35,6 +35,7 @@ std::unique_ptr<Population> CloningPopulationGenerator::generatePopulation() {
             auto& postSynapticNeuron = population->getNeuronById(cloneeSynapse.postSynapticNeuron->getNeuronId());
 
             auto clonedSynapse = factory.makeSynapse(
+                    cloneeSynapse.synapseParams,
                     &preSynapticNeuron,
                     &postSynapticNeuron,
                     cloneeSynapse.conductionDelay,

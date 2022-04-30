@@ -11,18 +11,18 @@ namespace soft_npu {
 
 struct ShortTermPlasticityState {
 
-    void update(const CycleContext& ctx) {
+    void update(const CycleContext& ctx, const SynapseParams& synapseParams) {
         if (lastTime < ctx.time) {
-            const auto& stpParams = *ctx.staticContext.synapseParams.shortTermPlasticityParams;
+            const auto& stpParams = *synapseParams.shortTermPlasticityParams;
             lastValue = stpParams.restingValue + exp(- (ctx.time - lastTime) * stpParams.tauInverse) * (lastValue - stpParams.restingValue);
             lastTime = ctx.time;
         }
     }
 
-    void onTransmission(const CycleContext& ctx) {
-        const auto& stpParams = *ctx.staticContext.synapseParams.shortTermPlasticityParams;
+    void onTransmission(const CycleContext& ctx, const SynapseParams& synapseParams) {
+        const auto& stpParams = *synapseParams.shortTermPlasticityParams;
 
-        update(ctx);
+        update(ctx, synapseParams);
 
         if (stpParams.isDepression) {
             lastValue -= stpParams.changeParameter * lastValue;

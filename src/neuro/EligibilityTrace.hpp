@@ -3,6 +3,7 @@
 #include <core/CycleContext.hpp>
 #include <core/StaticContext.hpp>
 #include <neuro/SynapseParams.hpp>
+#include <neuro/Synapse.hpp>
 
 namespace soft_npu {
 
@@ -13,8 +14,8 @@ struct EligibilityTrace {
     EligibilityTrace(const CycleContext& ctx, Synapse* synapse, ValueType stdpValue) noexcept :
         synapse(synapse),
         lastTime(ctx.time),
-        expiryTime(ctx.time + ctx.staticContext.synapseParams.eligibilityTraceCutOffTime),
-        lastValue(stdpValue * ctx.staticContext.synapseParams.eligibilityTraceTimeConstantInverse) {
+        expiryTime(ctx.time + synapse->synapseParams->eligibilityTraceCutOffTime),
+        lastValue(stdpValue * synapse->synapseParams->eligibilityTraceTimeConstantInverse) {
 
     }
 
@@ -22,7 +23,7 @@ struct EligibilityTrace {
 
         TimeType stopTime = std::min(ctx.time, expiryTime);
 
-        auto tauInverse = ctx.staticContext.synapseParams.eligibilityTraceTimeConstantInverse;
+        auto tauInverse = synapse->synapseParams->eligibilityTraceTimeConstantInverse;
         auto timeDiff = stopTime - lastTime;
         ValueType integralValue = (1 - exp(- timeDiff * tauInverse)) * lastValue / tauInverse;
 

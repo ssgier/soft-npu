@@ -50,7 +50,6 @@ CycleController::CycleController(const ParamsType& params,
         staticContext(
                 eventProcessor,
                 dopaminergicModulator,
-                population.getSynapseParams(),
                 population,
                 cycleOutputBuffer,
                 synapticTransmissionStats),

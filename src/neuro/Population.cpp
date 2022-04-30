@@ -5,13 +5,6 @@
 
 namespace soft_npu {
 
-Population::Population(const ParamsType& params) :
-    synapseParams(ParamsFactories::extractSynapseParams(params)) {
-}
-
-Population::Population(const SynapseParams& synapseParams) : synapseParams(synapseParams) {
-}
-
 void Population::onSpike(const CycleContext& cycleContext, const Neuron& neuron) const {
 
     if (channelProjector != nullptr) {
@@ -70,9 +63,6 @@ void Population::setChannelProjector(std::unique_ptr<const ChannelProjector> cha
     this->channelProjector = std::move(channelProjector);
 }
 
-const SynapseParams& Population::getSynapseParams() const {
-    return synapseParams;
-}
 
 namespace PopulationUtils {
 

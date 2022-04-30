@@ -6,10 +6,12 @@
 namespace soft_npu {
 
 Synapse::Synapse(
+        std::shared_ptr<const SynapseParams> synapseParams,
         const Neuron* preSynapticNeuron,
         Neuron* postSynapticNeuron,
         TimeType conductionDelay,
         ValueType initialWeight) :
+        synapseParams(synapseParams),
         preSynapticNeuron(preSynapticNeuron),
         postSynapticNeuron(postSynapticNeuron),
         conductionDelay(conductionDelay),
@@ -21,8 +23,8 @@ Synapse::Synapse(
 
 void Synapse::handleSTDP(const CycleContext& ctx, TimeType postSynSpikeTime, TimeType transmissionTime) {
     auto timePostMinusPre = postSynSpikeTime == transmissionTime ? 0.0 : postSynSpikeTime - transmissionTime;
-    if (std::abs(timePostMinusPre) < ctx.staticContext.synapseParams.stdpCutOffTime) {
-        ValueType stdpValue = STDPRule::evaluateSTDPRule(ctx.staticContext.synapseParams, timePostMinusPre);
+    if (std::abs(timePostMinusPre) < synapseParams->stdpCutOffTime) {
+        ValueType stdpValue = STDPRule::evaluateSTDPRule(*synapseParams, timePostMinusPre);
         ctx.staticContext.dopaminergicModulator.createEligibilityTrace(ctx, this, stdpValue);
     }
 }
