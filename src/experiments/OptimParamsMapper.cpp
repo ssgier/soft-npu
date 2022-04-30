@@ -28,7 +28,7 @@ OptimParamsMapper::OptimParamsMapper(std::shared_ptr<const ParamsType> templateP
     dimInfos.emplace_back("pocDynamicSimulation.rewardDosage", 0.05, 2.0);
 
     dimInfos.emplace_back("synapseParams.maxWeight", 0.5, 1.0);
-    dimInfos.emplace_back("synapseParams.stdpTimeConstant", 1e-3, 30e-3);
+    dimInfos.emplace_back("synapseParams.stdpTimeConstantPotentiation", 1e-3, 30e-3);
 
     dimInfos.emplace_back("populationGenerators.pEvo.inhibitorySynapseWeight", 0.1, 2.0);
 

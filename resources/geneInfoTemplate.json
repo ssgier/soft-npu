@@ -43,7 +43,7 @@
         "maxValue": 1
       },
       {
-        "id": "synapseParams.stdpTimeConstant",
+        "id": "synapseParams.stdpTimeConstantPotentiation",
         "minValue": 0.001,
         "maxValue": 0.03
       },

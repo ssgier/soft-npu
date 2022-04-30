@@ -82,7 +82,8 @@ auto getTemplateParams() {
 		"subBufferReserveSlots": 1000
 	},
     "synapseParams": {
-        "stdpTimeConstant": 20e-3,
+        "stdpTimeConstantPotentiation": 20e-3,
+        "stdpTimeConstantRatio": 1,
         "stdpCutOffTime": 1.0,
         "stdpScaleFactorPotentiation": 0.1,
         "stdpDepressionVsPotentiationRatio": 1.2,

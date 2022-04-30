@@ -6,7 +6,13 @@ SynapseParams extractSynapseParams(const ParamsType& params) {
     const auto& synapseParamsDetails = params["synapseParams"];
 
     SynapseParams synapseParams;
-    synapseParams.stdpTimeConstantInverse = 1.0 / static_cast<TimeType>(synapseParamsDetails["stdpTimeConstant"]);
+
+    TimeType stdpTimeConstantRatio = synapseParamsDetails["stdpTimeConstantRatio"];
+    TimeType tauPotentiation = synapseParamsDetails["stdpTimeConstantPotentiation"];
+    TimeType tauDepression = stdpTimeConstantRatio * tauPotentiation;
+    synapseParams.tauInversePotentiation = 1.0 / tauPotentiation;
+    synapseParams.tauInverseDepression = 1.0 / tauDepression;
+
     synapseParams.stdpCutOffTime = synapseParamsDetails["stdpCutOffTime"];
     synapseParams.stdpScaleFactorPotentiation = synapseParamsDetails["stdpScaleFactorPotentiation"];
     synapseParams.stdpScaleFactorDepression = synapseParams.stdpScaleFactorPotentiation * static_cast<ValueType>(synapseParamsDetails["stdpDepressionVsPotentiationRatio"]);

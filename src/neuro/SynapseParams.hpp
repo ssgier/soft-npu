@@ -7,7 +7,8 @@
 namespace soft_npu {
 
 struct SynapseParams {
-    TimeType stdpTimeConstantInverse;
+    TimeType tauInversePotentiation;
+    TimeType tauInverseDepression;
     TimeType stdpCutOffTime;
     ValueType stdpScaleFactorPotentiation;
     ValueType stdpScaleFactorDepression;
