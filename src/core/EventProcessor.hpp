@@ -5,6 +5,7 @@
 #include "BatchedRingBuffer.hpp"
 #include <Aliases.hpp>
 #include "TransmissionEvent.hpp"
+#include "FiringThresholdEvalEvent.hpp"
 #include <neuro/Neuron.hpp>
 #include <neuro/Synapse.hpp>
 #include "CommonEvent.hpp"
@@ -28,6 +29,10 @@ public:
     void pushCommonEvent(TimeType targetTime, std::unique_ptr<CommonEvent>&& commonEvent);
 
     void pushImmediateTransmissionEvent(ValueType epsp, Neuron& targetNeuron);
+
+    void pushFiringThresholdEvalEvent(Neuron& neuron) {
+        firingThresholdEvalBuffer.emplace_back(neuron);
+    }
 
     void pushSynapticTransmissionEvent(TimeType delay, ValueType epsp, Synapse* synapse, Neuron &targetNeuron) {
         assert(delay > 0);
@@ -78,6 +83,7 @@ private:
     };
 
     BatchedRingBuffer<TransmissionEvent> transmissionEventBuffer;
+    std::vector<FiringThresholdEvalEvent> firingThresholdEvalBuffer;
     using QueueType = std::priority_queue<CommonEventWithTargetTime, std::vector<CommonEventWithTargetTime>, std::greater<CommonEventWithTargetTime>>;
     QueueType commonEventsQueue;
     ValueType frequency;

@@ -10,8 +10,7 @@ namespace soft_npu {
 
 Neuron::Neuron(SizeType neuronId, std::shared_ptr<const NeuronParams> neuronParams) noexcept :
         neuronParams(neuronParams), neuronId(neuronId), lastTime(0), lastVoltage(0),
-        lastSpikeTime(std::numeric_limits<TimeType>::lowest()),
-        nextToLastSpikeTime(std::numeric_limits<TimeType>::lowest()) {
+        lastSpikeTime(std::numeric_limits<TimeType>::lowest()) {
 }
 
 std::shared_ptr<const NeuronParams> Neuron::getNeuronParams() const noexcept {
@@ -30,15 +29,13 @@ void Neuron::addContinuousInhibitionSource(Neuron * source) {
     continuousInhibitionSources.push_back(source);
 }
 
+void Neuron::pushThresholdEvalEvent(const CycleContext& ctx) {
+    ctx.staticContext.eventProcessor.pushFiringThresholdEvalEvent(*this);
+}
+
 void Neuron::processInboundOnSpike(const CycleContext& cycleContext) {
     for (const auto& synapticTransmissionInfo : synapticTransmissionSTDPBuffer) {
-
-        TimeType tPostMinusPre = cycleContext.time == synapticTransmissionInfo.transmissionTime ?
-            0.0 : cycleContext.time - synapticTransmissionInfo.transmissionTime;
-
-        if (tPostMinusPre < cycleContext.staticContext.synapseParams.stdpCutOffTime) {
-            synapticTransmissionInfo.synapse->handleSTDP(cycleContext, tPostMinusPre);
-        }
+        synapticTransmissionInfo.synapse->handleSTDP(cycleContext, cycleContext.time, synapticTransmissionInfo.transmissionTime);
     }
 
     synapticTransmissionSTDPBuffer.clear();
@@ -66,7 +63,6 @@ void Neuron::fire(const CycleContext& cycleContext) noexcept {
 
     lastVoltage = neuronParams->resetVoltage;
     lastTime = cycleContext.time + neuronParams->refractoryPeriod;
-    nextToLastSpikeTime = lastSpikeTime;
     lastSpikeTime = cycleContext.time;
 
     processInboundOnSpike(cycleContext);
