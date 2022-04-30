@@ -13,7 +13,7 @@ struct ShortTermPlasticityState {
 
     void update(const CycleContext& ctx) {
         if (lastTime < ctx.time) {
-            const auto& stpParams = ctx.staticContext.synapseParams.shortTermPlasticityParams.get();
+            const auto& stpParams = *ctx.staticContext.synapseParams.shortTermPlasticityParams;
             lastValue = stpParams.restingValue + exp(- (ctx.time - lastTime) * stpParams.tauInverse) * (lastValue - stpParams.restingValue);
             lastTime = ctx.time;
         }
