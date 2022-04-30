@@ -760,3 +760,82 @@ TEST(STDPIntegrationTests, SimultaneousDepressionAndPotentiation) {
     ASSERT_EQ(simulationResult.finalSynapseInfos.size(), 1);
     ASSERT_FLOAT_EQ(simulationResult.finalSynapseInfos[0].weight, 0.5 + 0.1 - 0.12 * exp(- 16e-3/20e-3));
 }
+
+TEST(STDPIntegrationTests, IncomingExcitatorySpikeOrderEquivalence) {
+    auto params = getTemplateParams();
+    (*params)["channelProjectors"]["OneToOne"]["epsp"] = 1.0;
+
+    auto populationJson = R"(
+{
+    "neurons": [
+        {
+            "neuronId": 0,
+            "neuronParamsName": "excitatory"
+        },
+        {
+            "neuronId": 1,
+            "neuronParamsName": "excitatory"
+        },
+        {
+            "neuronId": 2,
+            "neuronParamsName": "excitatory"
+        },
+        {
+            "neuronId": 3,
+            "neuronParamsName": "excitatory"
+        }
+    ],
+    "synapses": [
+        {
+            "preSynapticNeuronId": 0,
+            "postSynapticNeuronId": 3,
+            "initialWeight": 0.5,
+            "conductionDelay": 1e-3
+        },
+        {
+            "preSynapticNeuronId": 1,
+            "postSynapticNeuronId": 3,
+            "initialWeight": 0.5,
+            "conductionDelay": 1e-3
+        },
+        {
+            "preSynapticNeuronId": 2,
+            "postSynapticNeuronId": 3,
+            "initialWeight": 0.5,
+            "conductionDelay": 1e-3
+        }
+    ]
+}
+)"_json;
+
+    (*params)["simulation"]["populationGenerator"] = "pDetailedParams";
+    (*params)["populationGenerators"]["pDetailedParams"] = populationJson;
+
+    StaticInputSimulation simulation(params);
+    simulation.setSpikeTrains({
+        {1e-3, 3},
+        {11e-3, 0},
+        {11e-3, 1},
+        {11e-3, 2}
+    });
+    auto simulationResult = simulation.run();
+    StaticInputSimulation simulationWithReorderedSpikes(params);
+    simulationWithReorderedSpikes.setSpikeTrains({
+        {1e-3, 3},
+        {11e-3, 2},
+        {11e-3, 1},
+        {11e-3, 0}
+    });
+    auto resultWithReordering = simulationWithReorderedSpikes.run();
+
+    ASSERT_EQ(simulationResult.finalSynapseInfos.size(), resultWithReordering.finalSynapseInfos.size());
+
+    for (SizeType i = 0; i < simulationResult.finalSynapseInfos.size(); ++i) {
+        const auto& synInfo = simulationResult.finalSynapseInfos[i];
+        const auto& synInfoReordered = resultWithReordering.finalSynapseInfos[i];
+
+        ASSERT_EQ(synInfo.preSynapticNeuronId, synInfoReordered.preSynapticNeuronId);
+        ASSERT_EQ(synInfo.postSynapticNeuronId, synInfoReordered.postSynapticNeuronId);
+        ASSERT_FLOAT_EQ(synInfo.weight, synInfoReordered.weight);
+    }
+}
