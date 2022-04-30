@@ -19,9 +19,12 @@ Synapse::Synapse(
     }
 }
 
-void Synapse::handleSTDP(const CycleContext& ctx, TimeType timePostMinusPre) {
-    ValueType stdpValue = STDPRule::evaluateSTDPRule(ctx.staticContext.synapseParams, timePostMinusPre);
-    ctx.staticContext.dopaminergicModulator.createEligibilityTrace(ctx, this, stdpValue);
+void Synapse::handleSTDP(const CycleContext& ctx, TimeType postSynSpikeTime, TimeType transmissionTime) {
+    auto timePostMinusPre = postSynSpikeTime == transmissionTime ? 0.0 : postSynSpikeTime - transmissionTime;
+    if (std::abs(timePostMinusPre) < ctx.staticContext.synapseParams.stdpCutOffTime) {
+        ValueType stdpValue = STDPRule::evaluateSTDPRule(ctx.staticContext.synapseParams, timePostMinusPre);
+        ctx.staticContext.dopaminergicModulator.createEligibilityTrace(ctx, this, stdpValue);
+    }
 }
 
 }

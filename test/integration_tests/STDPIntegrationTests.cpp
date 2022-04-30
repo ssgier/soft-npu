@@ -53,7 +53,7 @@ TEST(STDPIntegrationTests, SimplePotentiation) {
 
     ASSERT_EQ(simulationResult.numExcitatorySpikes, 2);
     ASSERT_EQ(simulationResult.numInhibitorySpikes, 0);
-    ASSERT_EQ(simulationResult.numEventsProcessed, 2);
+    ASSERT_EQ(simulationResult.numEventsProcessed, 4);
 
     ASSERT_EQ(simulationResult.finalSynapseInfos.size(), 1);
     ASSERT_EQ(simulationResult.finalSynapseInfos[0].preSynapticNeuronId, 0);
@@ -182,7 +182,7 @@ TEST(STDPIntegrationTests, PotentiationTwoEPSPs) {
 
     ASSERT_EQ(simulationResult.numExcitatorySpikes, 3);
     ASSERT_EQ(simulationResult.numInhibitorySpikes, 0);
-    ASSERT_EQ(simulationResult.numEventsProcessed, 4);
+    ASSERT_EQ(simulationResult.numEventsProcessed, 7);
 
     auto finalSynapseInfos = simulationResult.finalSynapseInfos;
     std::sort(finalSynapseInfos.begin(), finalSynapseInfos.end());
@@ -256,7 +256,7 @@ TEST(STDPIntegrationTests, PotentiationTwoEPSPOneWouldBeEnough) {
 
     ASSERT_EQ(simulationResult.numExcitatorySpikes, 3);
     ASSERT_EQ(simulationResult.numInhibitorySpikes, 0);
-    ASSERT_EQ(simulationResult.numEventsProcessed, 4);
+    ASSERT_EQ(simulationResult.numEventsProcessed, 8);
 
     auto finalSynapseInfos = simulationResult.finalSynapseInfos;
     std::sort(finalSynapseInfos.begin(), finalSynapseInfos.end());
@@ -367,7 +367,7 @@ TEST(STDPIntegrationTests, SimpleDepression) {
 
     ASSERT_EQ(simulationResult.numExcitatorySpikes, 2);
     ASSERT_EQ(simulationResult.numInhibitorySpikes, 0);
-    ASSERT_EQ(simulationResult.numEventsProcessed, 3);
+    ASSERT_EQ(simulationResult.numEventsProcessed, 5);
 
     ASSERT_EQ(simulationResult.finalSynapseInfos.size(), 1);
     ASSERT_EQ(simulationResult.finalSynapseInfos[0].preSynapticNeuronId, 0);
@@ -448,40 +448,40 @@ auto populationJsonText = R"(
 }
 )";
 
-(*params)["simulation"]["populationGenerator"] = "pDetailedParams";
-(*params)["populationGenerators"]["pDetailedParams"] = nlohmann::json::parse(populationJsonText);
+    (*params)["simulation"]["populationGenerator"] = "pDetailedParams";
+    (*params)["populationGenerators"]["pDetailedParams"] = nlohmann::json::parse(populationJsonText);
 
-StaticInputSimulation simulation(params);
+    StaticInputSimulation simulation(params);
 
-simulation.setSpikeTrains({
-{11e-3, 0},
-{13e-3, 1},
-});
+    simulation.setSpikeTrains({
+        {11e-3, 0},
+        {13e-3, 1},
+    });
 
-simulation.recordVoltage(1, 12e-3);
+    simulation.recordVoltage(1, 12e-3);
 
-auto simulationResult = simulation.run();
+    auto simulationResult = simulation.run();
 
-ASSERT_EQ(simulationResult.recordedSpikes.size(), 2);
-ASSERT_FLOAT_EQ(simulationResult.recordedSpikes[0].time, 11e-3);
-ASSERT_EQ(simulationResult.recordedSpikes[0].neuronId, 0);
-ASSERT_FLOAT_EQ(simulationResult.recordedSpikes[1].time, 13e-3);
-ASSERT_EQ(simulationResult.recordedSpikes[1].neuronId, 1);
+    ASSERT_EQ(simulationResult.recordedSpikes.size(), 2);
+    ASSERT_FLOAT_EQ(simulationResult.recordedSpikes[0].time, 11e-3);
+    ASSERT_EQ(simulationResult.recordedSpikes[0].neuronId, 0);
+    ASSERT_FLOAT_EQ(simulationResult.recordedSpikes[1].time, 13e-3);
+    ASSERT_EQ(simulationResult.recordedSpikes[1].neuronId, 1);
 
-ASSERT_EQ(simulationResult.voltageRecordings[0].neuronId, 1);
-ASSERT_FLOAT_EQ(simulationResult.voltageRecordings[0].voltage, -0.1);
-ASSERT_FLOAT_EQ(simulationResult.voltageRecordings[0].time, 12e-3);
+    ASSERT_EQ(simulationResult.voltageRecordings[0].neuronId, 1);
+    ASSERT_FLOAT_EQ(simulationResult.voltageRecordings[0].voltage, -0.1);
+    ASSERT_FLOAT_EQ(simulationResult.voltageRecordings[0].time, 12e-3);
 
-ASSERT_EQ(simulationResult.numExcitatorySpikes, 1);
-ASSERT_EQ(simulationResult.numInhibitorySpikes, 1);
-ASSERT_FLOAT_EQ(simulationResult.meanExcitatoryFiringRate, 1);
-ASSERT_FLOAT_EQ(simulationResult.meanInhibitoryFiringRate, 1);
-ASSERT_EQ(simulationResult.numEventsProcessed, 4);
+    ASSERT_EQ(simulationResult.numExcitatorySpikes, 1);
+    ASSERT_EQ(simulationResult.numInhibitorySpikes, 1);
+    ASSERT_FLOAT_EQ(simulationResult.meanExcitatoryFiringRate, 1);
+    ASSERT_FLOAT_EQ(simulationResult.meanInhibitoryFiringRate, 1);
+    ASSERT_EQ(simulationResult.numEventsProcessed, 6);
 
-ASSERT_EQ(simulationResult.finalSynapseInfos.size(), 1);
-ASSERT_EQ(simulationResult.finalSynapseInfos[0].preSynapticNeuronId, 0);
-ASSERT_EQ(simulationResult.finalSynapseInfos[0].postSynapticNeuronId, 1);
-ASSERT_FLOAT_EQ(simulationResult.finalSynapseInfos[0].weight, 0.1);
+    ASSERT_EQ(simulationResult.finalSynapseInfos.size(), 1);
+    ASSERT_EQ(simulationResult.finalSynapseInfos[0].preSynapticNeuronId, 0);
+    ASSERT_EQ(simulationResult.finalSynapseInfos[0].postSynapticNeuronId, 1);
+    ASSERT_FLOAT_EQ(simulationResult.finalSynapseInfos[0].weight, 0.1);
 }
 
 TEST(STDPIntegrationTests, STDPJustBeforeCutOffTime) {
@@ -524,7 +524,7 @@ TEST(STDPIntegrationTests, STDPJustBeforeCutOffTime) {
 
     auto simulationResult = simulation.run();
 
-    ASSERT_EQ(simulationResult.numEventsProcessed, 3);
+    ASSERT_EQ(simulationResult.numEventsProcessed, 5);
     ASSERT_FLOAT_EQ(simulationResult.finalSynapseInfos[0].weight, 0.1 + 0.1 * exp(- 4.9e-3 / 20e-3));
 }
 
@@ -568,7 +568,7 @@ TEST(STDPIntegrationTests, NoSTDPAfterCutOffTime) {
 
     auto simulationResult = simulation.run();
 
-    ASSERT_EQ(simulationResult.numEventsProcessed, 3);
+    ASSERT_EQ(simulationResult.numEventsProcessed, 5);
     ASSERT_FLOAT_EQ(simulationResult.finalSynapseInfos[0].weight, 0.1);
 }
 
@@ -649,7 +649,7 @@ TEST(STDPIntegrationTests, STDPComplexScenario) {
 
     ASSERT_EQ(simulationResult.numExcitatorySpikes, 6);
     ASSERT_EQ(simulationResult.numInhibitorySpikes, 2);
-    ASSERT_EQ(simulationResult.numEventsProcessed, 13);
+    ASSERT_EQ(simulationResult.numEventsProcessed, 22);
 
     auto finalSynapseInfos = simulationResult.finalSynapseInfos;
     std::sort(finalSynapseInfos.begin(), finalSynapseInfos.end());

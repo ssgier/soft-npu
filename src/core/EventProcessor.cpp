@@ -44,6 +44,12 @@ void EventProcessor::processCycle(const CycleContext & cycleContext) {
 
     processBatch(cycleContext, transmissionEventBuffer);
 
+    for (auto& event : firingThresholdEvalBuffer) {
+        event.process(cycleContext);
+    }
+    numEventsProcessed += firingThresholdEvalBuffer.size();
+    firingThresholdEvalBuffer.clear();
+
     for (;
             !commonEventsQueue.empty() &&
             commonEventsQueue.top().targetTime <= cycleContext.time;

@@ -26,7 +26,7 @@ struct Synapse : private boost::noncopyable {
     TimeType conductionDelay;
     ValueType weight;
 
-    void handleSTDP(const CycleContext&, TimeType timePostMinusPre);
+    void handleSTDP(const CycleContext&, TimeType postSynSpikeTime, TimeType transmissionTime);
 };
 
 }

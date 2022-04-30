@@ -41,7 +41,7 @@ TEST(BasicIntegrationTests, SimpleExcitatorySpike) {
     ASSERT_EQ(simulationResult.numInhibitorySpikes, 0);
     ASSERT_FLOAT_EQ(simulationResult.meanExcitatoryFiringRate, 1);
     ASSERT_FLOAT_EQ(simulationResult.meanInhibitoryFiringRate, 0);
-    ASSERT_EQ(simulationResult.numEventsProcessed, 3);
+    ASSERT_EQ(simulationResult.numEventsProcessed, 4);
 }
 
 
@@ -256,7 +256,7 @@ TEST(BasicIntegrationTests, SimpleSynapticTransmission) {
     ASSERT_EQ(simulationResult.numInhibitorySpikes, 1);
     ASSERT_FLOAT_EQ(simulationResult.meanExcitatoryFiringRate, 1);
     ASSERT_FLOAT_EQ(simulationResult.meanInhibitoryFiringRate, 1);
-    ASSERT_EQ(simulationResult.numEventsProcessed, 2);
+    ASSERT_EQ(simulationResult.numEventsProcessed, 4);
 }
 
 TEST(BasicIntegrationTests, TwoCoincidingEPSPs) {
@@ -320,7 +320,7 @@ TEST(BasicIntegrationTests, TwoCoincidingEPSPs) {
     ASSERT_EQ(simulationResult.numInhibitorySpikes, 0);
     ASSERT_FLOAT_EQ(simulationResult.meanExcitatoryFiringRate, 1);
     ASSERT_FLOAT_EQ(simulationResult.meanInhibitoryFiringRate, 0);
-    ASSERT_EQ(simulationResult.numEventsProcessed, 4);
+    ASSERT_EQ(simulationResult.numEventsProcessed, 7);
 }
 
 TEST(BasicIntegrationTests, TwoEPSPsAndOneIPSP) {
@@ -397,7 +397,7 @@ TEST(BasicIntegrationTests, TwoEPSPsAndOneIPSP) {
     ASSERT_EQ(simulationResult.numInhibitorySpikes, 1);
     ASSERT_FLOAT_EQ(simulationResult.meanExcitatoryFiringRate, 1);
     ASSERT_FLOAT_EQ(simulationResult.meanInhibitoryFiringRate, 1);
-    ASSERT_EQ(simulationResult.numEventsProcessed, 6);
+    ASSERT_EQ(simulationResult.numEventsProcessed, 10);
 }
 
 TEST(BasicIntegrationTests, VoltageFloor) {
@@ -616,4 +616,58 @@ TEST(BasicIntegrationTests, OneToManyChannelProjectorOutput) {
 
     ASSERT_EQ(spikeCountChannel6, 3);
     ASSERT_EQ(spikeCountChannel7, 2);
+}
+
+TEST(BasicIntegrationTests, IPSPProcessedAfterSufficientEPSP) {
+    auto params = getTemplateParams();
+    (*params)["channelProjectors"]["OneToOne"]["epsp"] = 1.0;
+
+    auto populationJson = R"(
+{
+    "neurons": [
+        {
+            "neuronId": 0,
+            "neuronParamsName": "excitatory"
+        },
+        {
+            "neuronId": 1,
+            "neuronParamsName": "inhibitory"
+        },
+        {
+            "neuronId": 2,
+            "neuronParamsName": "excitatory"
+        }
+    ],
+    "synapses": [
+        {
+            "preSynapticNeuronId": 0,
+            "postSynapticNeuronId": 2,
+            "initialWeight": 1.0,
+            "conductionDelay": 1e-3
+        },
+        {
+            "preSynapticNeuronId": 1,
+            "postSynapticNeuronId": 2,
+            "initialWeight": 0.8,
+            "conductionDelay": 1e-3
+        }
+    ]
+}
+)"_json;
+
+    (*params)["simulation"]["populationGenerator"] = "pDetailedParams";
+    (*params)["populationGenerators"]["pDetailedParams"] = populationJson;
+
+    StaticInputSimulation simulation(params);
+
+    simulation.setSpikeTrains({
+        {10e-3, 0},
+        {10e-3, 1}
+    });
+
+    auto simulationResult = simulation.run();
+
+    ASSERT_EQ(simulationResult.recordedSpikes.size(), 2);
+    ASSERT_EQ(simulationResult.recordedSpikes[0].neuronId, 0);
+    ASSERT_EQ(simulationResult.recordedSpikes[1].neuronId, 1);
 }

@@ -23,21 +23,28 @@ public:
             // epsp override scaling is experimental. May be refined later.
             lastVoltage = std::max(lastVoltage + epsp * neuronParams->epspOverrideScaleFactor, neuronParams->voltageFloor);
 
-            auto compareVoltage = lastVoltage;
-            if (!continuousInhibitionSources.empty()) {
-                ValueType continuousInhibition = 0;
+            if (lastVoltage >= neuronParams->thresholdVoltage) {
+                pushThresholdEvalEvent(cycleContext);
+            }
+        }
+    }
 
-                for (auto source : continuousInhibitionSources) {
-                    source->update(time);
-                    continuousInhibition += source->getMembraneVoltage(time);
-                }
+    void fireIfAboveThreshold(const CycleContext& ctx, TimeType time) {
 
-                compareVoltage -= continuousInhibition;
+        auto compareVoltage = lastVoltage;
+        if (!continuousInhibitionSources.empty()) {
+            ValueType continuousInhibition = 0;
+
+            for (auto source : continuousInhibitionSources) {
+                source->update(time);
+                continuousInhibition += source->getMembraneVoltage(time);
             }
 
-            if (compareVoltage >= neuronParams->thresholdVoltage) {
-                fire(cycleContext);
-            }
+            compareVoltage -= continuousInhibition;
+        }
+
+        if (compareVoltage >= neuronParams->thresholdVoltage) {
+            fire(ctx);
         }
     }
 
@@ -76,10 +83,6 @@ public:
         return lastSpikeTime;
     }
 
-    TimeType getNextToLastSpikeTime() const noexcept {
-        return nextToLastSpikeTime;
-    }
-
     void registerInboundSynapticTransmission(const CycleContext& cycleContext, Synapse* synapse);
 
     auto cbeginOutboundSynapses() const noexcept {
@@ -109,7 +112,8 @@ private:
     TimeType lastTime;
     ValueType lastVoltage;
     TimeType lastSpikeTime;
-    TimeType nextToLastSpikeTime;
+
+    void pushThresholdEvalEvent(const CycleContext&);
 
     bool isRefractoryPeriod(TimeType time) const noexcept {
         return time < lastTime;
