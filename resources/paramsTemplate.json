@@ -35,7 +35,8 @@
     "subBufferReserveSlots": 1000
   },
   "synapseParams": {
-    "stdpTimeConstant": 2e-3,
+    "stdpTimeConstantPotentiation": 2e-3,
+    "stdpTimeConstantRatio": 1,
     "stdpCutOffTime": 20e-3,
     "stdpScaleFactorPotentiation": 0.1,
     "stdpDepressionVsPotentiationRatio": 1.2,
