@@ -93,6 +93,14 @@ public:
         return outboundSynapses.cend();
     }
 
+    auto cbeginInhibitionSources() const noexcept {
+        return continuousInhibitionSources.cbegin();
+    }
+
+    auto cendInhibitionSources() const noexcept {
+        return continuousInhibitionSources.cend();
+    }
+
 private:
 
     struct SynapticTransmissionInfo {
