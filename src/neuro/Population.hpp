@@ -4,13 +4,14 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <memory>
-#include <neuro/SynapseParams.hpp>
+#include "SynapseParams.hpp"
+#include "Synapse.hpp"
+#include "ChannelProjector.hpp"
 #include <boost/core/noncopyable.hpp>
 
 namespace soft_npu {
 
 struct ChannelProjector;
-class Synapse;
 
 class Population : private boost::noncopyable {
 public:

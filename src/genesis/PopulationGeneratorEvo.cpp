@@ -3,6 +3,8 @@
 #include "TrivialNeuroComponentsFactory.hpp"
 #include <neuro/ExplicitChannelProjector.hpp>
 #include <neuro/ChannelProjectorFactory.hpp>
+#include "SubCircuitAdapter.hpp"
+#include "ConnectivityParams.hpp"
 
 namespace soft_npu {
 
@@ -13,122 +15,86 @@ PopulationGeneratorEvo::PopulationGeneratorEvo(const ParamsType& params,
 }
 
 std::unique_ptr<Population> PopulationGeneratorEvo::generatePopulation() {
-
+    TrivialNeuroComponentsFactory factory;
     auto population = std::make_unique<Population>();
     auto channelProjector = std::make_unique<ExplicitChannelProjector>();
+    const auto& evoParams = params["populationGenerators"]["pEvo"];
 
-    ValueType channelProjectedEpsp = params["populationGenerators"]["pEvo"]["channelProjectedEpsp"];
-    SizeType targetNumMotorNeurons = params["populationGenerators"]["pEvo"]["targetNumMotorNeurons"];
+    std::array<std::unique_ptr<SubCircuitAdapter>, 2> sensoryCircuits;
+    std::array<std::unique_ptr<SubCircuitAdapter>, 2> motorCircuits;
 
-    SizeType numMotorNeurons = targetNumMotorNeurons;
-    if (numMotorNeurons % 2 != 0) {
-        -- numMotorNeurons;
+    for (SizeType i = 0; i < 2; ++i) {
+        sensoryCircuits[i] = std::make_unique<SubCircuitAdapter>(
+            factory, *population, *channelProjector, randomEngine);
+
+        motorCircuits[i] = std::make_unique<SubCircuitAdapter>(
+            factory, *population, *channelProjector, randomEngine);
     }
 
-    TimeType minCondutionDelay = params["populationGenerators"]["pEvo"]["minConductionDelay"];
-    TimeType maxCondutionDelay = params["populationGenerators"]["pEvo"]["maxConductionDelay"];
-    ValueType inhibitorySynapseWeight = params["populationGenerators"]["pEvo"]["inhibitorySynapseWeight"];
-    ValueType maxSynapticWeight = params["synapseParams"]["maxWeight"];
+    SizeType inChannelDivergence = evoParams["inChannelDivergence"];
+    ValueType channelProjectedEpsp = evoParams["channelProjectedEpsp"];
+    SizeType outChannelConvergence = evoParams["outChannelConvergence"];
+
+    ConnectivityParams connParamsIntra;
+    connParamsIntra.minConductionDelay = evoParams["minConductionDelay"];
+    connParamsIntra.maxConductionDelay = evoParams["maxConductionDelay"];
+    connParamsIntra.initialWeight = evoParams["initialWeight"];
+    connParamsIntra.connectDensity = evoParams["intraCircuitConnectDensity"];
+
+    ConnectivityParams connParamsInter = connParamsIntra;
+    connParamsInter.connectDensity = evoParams["interCircuitConnectDensity"];
+
+    ConnectivityParams connParamsContinuousInhibition = connParamsIntra;
+    connParamsContinuousInhibition.connectDensity = 1.0;
 
     auto excitatoryNeuronParams = ParamsFactories::extractExcitatoryNeuronParams(params);
-    auto inhibitoryNeuronParams = ParamsFactories::extractInhibitoryNeuronParams(params);
     auto synapseParams = ParamsFactories::extractSynapseParams(params);
 
-    TrivialNeuroComponentsFactory factory;
-
-    SizeType numNeurons = 4 + numMotorNeurons;
-
-    for (SizeType neuronId = 0; neuronId < numNeurons; ++ neuronId) {
-        bool isInhibitory = neuronId >= numNeurons - 2;
-
-        auto neuronParams = isInhibitory ? inhibitoryNeuronParams :
-        excitatoryNeuronParams;
-
-        population->addNeuron(factory.makeNeuron(neuronId, neuronParams),
-                              Population::defaultLocation);
+    for (SizeType inChannelId = 0; inChannelId < 2; ++ inChannelId) {
+        auto& circuit = *sensoryCircuits[inChannelId];
+        circuit.addNeurons(inChannelDivergence, excitatoryNeuronParams);
+        circuit.connectAllToInput(inChannelId, channelProjectedEpsp);
     }
 
-    auto& sensoryNeuron0 = population->getNeuronById(0);
-    auto& sensoryNeuron1 = population->getNeuronById(1);
+    for (SizeType outChannelId = 0; outChannelId < 2; ++ outChannelId) {
+        auto& circuit = *motorCircuits[outChannelId];
+        circuit.addNeurons(outChannelConvergence, excitatoryNeuronParams);
+        circuit.buildInternalConnnectivity(synapseParams, connParamsIntra);
+        circuit.connectAllToOutput(outChannelId);
+    }
 
-    channelProjector->addSensoryNeuron(sensoryNeuron0, {0}, channelProjectedEpsp);
-    channelProjector->addSensoryNeuron(sensoryNeuron1, {1}, channelProjectedEpsp);
-
-    auto fromMotorNeuronId = 2;
-    auto toMotorNeuronId = fromMotorNeuronId + numMotorNeurons;
-
-    // full connectivity between sensory and motor neurons
-
-    std::uniform_real_distribution<TimeType>
-    conductionDelayDistribution(minCondutionDelay, maxCondutionDelay);
-
-    for (SizeType preSynNeuronId = 0; preSynNeuronId < 2; ++ preSynNeuronId) {
-        for (SizeType postSynNeuronId = fromMotorNeuronId; postSynNeuronId <
-            toMotorNeuronId; ++ postSynNeuronId) {
-            auto& preSynNeuron = population->getNeuronById(preSynNeuronId);
-            auto& postSynNeuron = population->getNeuronById(postSynNeuronId);
-
-            ValueType initialWeight = 0.0;
-            TimeType conductionDelay = conductionDelayDistribution(randomEngine);
-
-            auto synapse = factory.makeSynapse(
-                    synapseParams,
-                    &preSynNeuron,
-                    &postSynNeuron,
-                    conductionDelay,
-                    initialWeight);
-
-            preSynNeuron.addOutboundSynapse(synapse.get());
-            population->addExcitatorySynapse(std::move(synapse));
+    for (SizeType i = 0; i < 2; ++i) {
+        for (SizeType j = 0; j < 2; ++j) {
+            sensoryCircuits[i]->createProjectionOnto(*motorCircuits[j], connParamsInter, synapseParams);
         }
     }
 
+    auto crossInhibitionNeuronParams = ParamsFactories::extractNeuronParams(params, "crossInhibition");
+    auto autoInhibitionNeuronParams = ParamsFactories::extractNeuronParams(params, "autoInhibition");
 
-    // two mutually inhibiting groups of motor neurons
+    auto inhibitionSource00 = factory.makeNeuron(autoInhibitionNeuronParams, *population);
+    motorCircuits[0]->addInhibitionSource(*inhibitionSource00);
+    motorCircuits[0]->addInhibitionSink(*inhibitionSource00, connParamsContinuousInhibition, synapseParams);
+    population->addNeuron(std::move(inhibitionSource00), Population::defaultLocation);
+    
+    auto inhibitionSource01 = factory.makeNeuron(crossInhibitionNeuronParams, *population);
+    motorCircuits[1]->addInhibitionSource(*inhibitionSource01);
+    motorCircuits[0]->addInhibitionSink(*inhibitionSource01, connParamsContinuousInhibition, synapseParams);
+    population->addNeuron(std::move(inhibitionSource01), Population::defaultLocation);
 
-    auto& inhibitoryNeuron0 = population->getNeuronById(numNeurons - 2);
-    auto& inhibitoryNeuron1 = population->getNeuronById(numNeurons - 1);
+    auto inhibitionSource10 = factory.makeNeuron(crossInhibitionNeuronParams, *population);
+    motorCircuits[0]->addInhibitionSource(*inhibitionSource10);
+    motorCircuits[1]->addInhibitionSink(*inhibitionSource10, connParamsContinuousInhibition, synapseParams);
+    population->addNeuron(std::move(inhibitionSource10), Population::defaultLocation);
 
-    for (SizeType motorNeuronId = fromMotorNeuronId; motorNeuronId < toMotorNeuronId;  ++ motorNeuronId) {
-
-        auto& motorNeuron = population->getNeuronById(motorNeuronId);
-
-        bool group = motorNeuronId < fromMotorNeuronId + numMotorNeurons / 2;
-        auto& outInhibitoryNeuron = group ? inhibitoryNeuron1 : inhibitoryNeuron0;
-        auto& inInhibitoryNeuron = group ? inhibitoryNeuron0 : inhibitoryNeuron1;
-
-        SizeType channelId = group ? 1 : 0;
-        channelProjector->addMotorNeuron(motorNeuron, channelId);
-
-        TimeType conductionDelay = 0.1e-3;
-
-        auto outSynapse = factory.makeSynapse(
-                synapseParams,
-                &motorNeuron,
-                &outInhibitoryNeuron,
-                conductionDelay,
-                maxSynapticWeight
-                );
-
-        auto inSynapse = factory.makeSynapse(
-                synapseParams,
-                &inInhibitoryNeuron,
-                &motorNeuron,
-                conductionDelay,
-                inhibitorySynapseWeight
-                );
-
-        motorNeuron.addOutboundSynapse(outSynapse.get());
-        inInhibitoryNeuron.addOutboundSynapse(inSynapse.get());
-
-        population->addExcitatorySynapse(std::move(outSynapse));
-        population->addInhibitorySynapse(std::move(inSynapse));
-    }
+    auto inhibitionSource11 = factory.makeNeuron(autoInhibitionNeuronParams, *population);
+    motorCircuits[1]->addInhibitionSource(*inhibitionSource11);
+    motorCircuits[1]->addInhibitionSink(*inhibitionSource11, connParamsContinuousInhibition, synapseParams);
+    population->addNeuron(std::move(inhibitionSource11), Population::defaultLocation);
 
     population->setChannelProjector(std::move(channelProjector));
 
     return population;
 }
-
 
 }

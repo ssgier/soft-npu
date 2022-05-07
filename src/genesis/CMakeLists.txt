@@ -1,6 +1,7 @@
 set(SOURCE
         ${SOURCE}
         ${CMAKE_CURRENT_SOURCE_DIR}/TrivialNeuroComponentsFactory.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/NeuroComponentsFactory.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/PopulationGeneratorFactory.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/SingleNeuronPopulationGenerator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/PopulationGeneratorDetailedParams.cpp
@@ -9,4 +10,5 @@ set(SOURCE
         ${CMAKE_CURRENT_SOURCE_DIR}/PopulationGeneratorR2DSheet.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/PopulationGeneratorEvo.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/SynapseInjectionR2DSheet.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/SubCircuitAdapter.cpp
         PARENT_SCOPE)
