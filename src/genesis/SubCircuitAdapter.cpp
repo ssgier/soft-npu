@@ -55,6 +55,11 @@ void SubCircuitAdapter::createProjectionOnto(
             connectivityParams.minConductionDelay,
             connectivityParams.maxConductionDelay);
 
+    std::uniform_real_distribution<ValueType> initialWeightDist(
+            connectivityParams.minInitialWeight,
+            connectivityParams.maxInitialWeight);
+
+
     for (auto preSynNeuron : neurons) {
         std::shuffle(targetNeuronsCopy.begin(), targetNeuronsCopy.end(), randomEngine);
         SizeType numPostSynNeuronsAdded = 0;
@@ -73,7 +78,7 @@ void SubCircuitAdapter::createProjectionOnto(
                     preSynNeuron,
                     postSynNeuron,
                     conductionDelayDist(randomEngine),
-                    connectivityParams.initialWeight);
+                    initialWeightDist(randomEngine));
 
             preSynNeuron->addOutboundSynapse(synapse.get());
             if (preSynNeuron->getNeuronParams()->isInhibitory) {
@@ -106,6 +111,10 @@ void SubCircuitAdapter::addInhibitionSink(
         connectivityParams.minConductionDelay,
         connectivityParams.maxConductionDelay);
 
+    std::uniform_real_distribution<ValueType> initialWeightDist(
+            connectivityParams.minInitialWeight,
+            connectivityParams.maxInitialWeight);
+
     for (auto neuron : neurons) {
 
         auto synapse = factory.makeSynapse(
@@ -113,7 +122,7 @@ void SubCircuitAdapter::addInhibitionSink(
             neuron,
             &inhibitionSink,
             conductionDelayDist(randomEngine),
-            connectivityParams.initialWeight);
+            initialWeightDist(randomEngine));
 
         neuron->addOutboundSynapse(synapse.get());
         if (neuron->getNeuronParams()->isInhibitory) {

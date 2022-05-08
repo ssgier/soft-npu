@@ -18,7 +18,8 @@ auto makeParamsTemplate() {
     "outChannelConvergence": 20,
     "minConductionDelay": 1e-3,
     "maxConductionDelay": 20e-3,
-    "initialWeight": 0.1,
+    "minInitialWeight": 0.1,
+    "maxInitialWeight": 0.2,
     "intraCircuitConnectDensity": 1,
     "interCircuitConnectDensity": 1
 }
@@ -85,7 +86,8 @@ void checkSynapseParams(const Population& population) {
         std::for_each(neuron->cbeginOutboundSynapses(), neuron->cendOutboundSynapses(), [](const auto synapse) {
             ASSERT_GE(synapse->conductionDelay, 1e-3);
             ASSERT_LT(synapse->conductionDelay, 20e-3);
-            ASSERT_FLOAT_EQ(synapse->weight, 0.1);
+            ASSERT_GE(synapse->weight, 0.1);
+            ASSERT_LT(synapse->weight, 0.2);
         });
     });
 }
@@ -261,7 +263,8 @@ TEST (PopulationGeneratorEvoTest, InputChannelWiring) {
 TEST (PopulationGeneratorEvoTest, OutputChannelWiring) {
     auto params = makeParamsTemplate();
     (*params)["populationGenerators"]["pEvo"]["inChannelDivergence"] = 1;
-    (*params)["populationGenerators"]["pEvo"]["initialWeight"] = 1;
+    (*params)["populationGenerators"]["pEvo"]["minInitialWeight"] = 1;
+    (*params)["populationGenerators"]["pEvo"]["maxInitialWeight"] = 1;
     (*params)["neuronParams"]["autoInhibition"]["epspOverrideScaleFactor"] = 0;
     (*params)["neuronParams"]["crossInhibition"]["epspOverrideScaleFactor"] = 0;
     (*params)["populationGenerators"]["pEvo"]["intraCircuitConnectDensity"] = 0;

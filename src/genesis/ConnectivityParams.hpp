@@ -5,7 +5,8 @@
 namespace soft_npu {
 struct ConnectivityParams {
     ValueType connectDensity;
-    ValueType initialWeight;
+    ValueType minInitialWeight;
+    ValueType maxInitialWeight;
     TimeType minConductionDelay;
     TimeType maxConductionDelay;
 };
