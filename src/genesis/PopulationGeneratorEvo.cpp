@@ -38,7 +38,8 @@ std::unique_ptr<Population> PopulationGeneratorEvo::generatePopulation() {
     ConnectivityParams connParamsIntra;
     connParamsIntra.minConductionDelay = evoParams["minConductionDelay"];
     connParamsIntra.maxConductionDelay = evoParams["maxConductionDelay"];
-    connParamsIntra.initialWeight = evoParams["initialWeight"];
+    connParamsIntra.minInitialWeight = evoParams["minInitialWeight"];
+    connParamsIntra.maxInitialWeight = evoParams["maxInitialWeight"];
     connParamsIntra.connectDensity = evoParams["intraCircuitConnectDensity"];
 
     ConnectivityParams connParamsInter = connParamsIntra;
