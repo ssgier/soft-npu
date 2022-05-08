@@ -46,6 +46,7 @@ ParamsType enrichGeneInfoTemplate(const ParamsType &paramsTemplate, const Params
 
     if (geneInfoTemplate.is_object()) {
 
+        PLOG_DEBUG << "Extracting from params template at path: " << geneInfoTemplate["id"];
         ParamsType prototypeValue = extractAtPath(paramsTemplate, geneInfoTemplate["id"]);
 
         ParamsType enrichedTemplate(geneInfoTemplate);

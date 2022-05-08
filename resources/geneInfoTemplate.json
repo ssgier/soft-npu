@@ -35,11 +35,9 @@
         "minValue": 0.1,
         "maxValue": 1
       },
-
-
       {
         "id": "synapseParams.maxWeight",
-        "minValue": 0.5,
+        "minValue": 0.25,
         "maxValue": 1
       },
       {
@@ -47,12 +45,6 @@
         "minValue": 0.001,
         "maxValue": 0.03
       },
-      {
-        "id": "populationGenerators.pEvo.inhibitorySynapseWeight",
-        "minValue": 0.1,
-        "maxValue": 2
-      },
-
       {
         "id": "synapseParams.stdpCutOffTime",
         "minValue": 0.02,
@@ -85,11 +77,55 @@
       "id": "neuronParams.inhibitory.refractoryPeriod",
       "minValue": 0.001,
       "maxValue": 0.01
+    },
+
+
+    {
+      "id": "neuronParams.autoInhibition.timeConstant",
+      "minValue": 1e-3,
+      "maxValue": 20e-3
+    },
+    {
+      "id": "neuronParams.autoInhibition.epspOverrideScaleFactor",
+      "minValue": 0.0,
+      "maxValue": 0.5
+    },
+    {
+      "id": "neuronParams.crossInhibition.timeConstant",
+      "minValue": 1e-3,
+      "maxValue": 10e-3
+    },
+    {
+      "id": "neuronParams.crossInhibition.epspOverrideScaleFactor",
+      "minValue": 0.0,
+      "maxValue": 0.5
     }
   ],
-  {
-    "id": "populationGenerators.pEvo.targetNumMotorNeurons",
-    "minValue": 8,
-    "maxValue": 200
-  }
+  [
+    {
+      "id": "populationGenerators.pEvo.inChannelDivergence",
+      "minValue": 1,
+      "maxValue": 20
+    },
+    {
+      "id": "populationGenerators.pEvo.outChannelConvergence",
+      "minValue": 10,
+      "maxValue": 100
+    },
+    {
+      "id": "populationGenerators.pEvo.maxInitialWeight",
+      "minValue": 0.01,
+      "maxValue": 1.0
+    },
+    {
+      "id": "populationGenerators.pEvo.intraCircuitConnectDensity",
+      "minValue": 0,
+      "maxValue": 1
+    },
+    {
+      "id": "populationGenerators.pEvo.interCircuitConnectDensity",
+      "minValue": 0,
+      "maxValue": 1
+    }
+  ]
 ]
