@@ -17,10 +17,14 @@
   "populationGenerators": {
     "pEvo": {
       "channelProjectedEpsp": 1.5,
-      "targetNumMotorNeurons": 20,
+      "inChannelDivergence": 10,
+      "outChannelConvergence": 20,
       "minConductionDelay": 1e-3,
       "maxConductionDelay": 20e-3,
-      "inhibitorySynapseWeight": 1.0
+      "minInitialWeight": 0.1,
+      "maxInitialWeight": 0.2,
+      "intraCircuitConnectDensity": 1,
+      "interCircuitConnectDensity": 1
     }
   },
   "dopaminergicModulator": {
@@ -60,6 +64,24 @@
       "resetVoltage": 0.0,
       "voltageFloor": -0.0,
       "isInhibitory": true
+    },
+    "autoInhibition": {
+      "timeConstant": 3e-3,
+      "refractoryPeriod": 0e-3,
+      "thresholdVoltage": 0.5,
+      "resetVoltage": 0.0,
+      "voltageFloor": -0.0,
+      "isInhibitory": true,
+      "epspOverrideScaleFactor": 0.1
+    },
+    "crossInhibition": {
+      "timeConstant": 3e-3,
+      "refractoryPeriod": 0e-3,
+      "thresholdVoltage": 0.5,
+      "resetVoltage": 0.0,
+      "voltageFloor": -0.0,
+      "isInhibitory": true,
+      "epspOverrideScaleFactor": 0.1
     }
   },
   "pocDynamicSimulation": {
