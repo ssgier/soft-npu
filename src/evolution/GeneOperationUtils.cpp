@@ -18,13 +18,13 @@ std::shared_ptr<const Gene> crossover(
         evolutionParams, genes, randomEngine);
 }
 
-std::string getUnsupportedTypeErrorMsg(const nlohmann::json& json) {
+std::string getUnsupportedTypeErrorMsg(const ParamsType& json) {
     std::stringstream ss;
     ss << "Unsupported json type: " << json.type_name() << " for json: " << json;
     throw std::runtime_error(ss.str());
 }
 
-std::shared_ptr<GeneElement> extractGeneElement(const nlohmann::json& leafGeneInfoJson) {
+std::shared_ptr<GeneElement> extractGeneElement(const ParamsType& leafGeneInfoJson) {
     std::string id = leafGeneInfoJson["id"];
     const auto& prototypeValueJson = leafGeneInfoJson["prototypeValue"];
 
@@ -49,7 +49,7 @@ std::shared_ptr<GeneElement> extractGeneElement(const nlohmann::json& leafGeneIn
     }
 }
 
-std::shared_ptr<const Gene> assembleFromJson(const nlohmann::json& geneInfoJson) {
+std::shared_ptr<const Gene> assembleFromJson(const ParamsType& geneInfoJson) {
     if (geneInfoJson.is_object()) {
         return std::make_shared<Gene>(extractGeneElement(geneInfoJson));
     } else if (geneInfoJson.is_array()) {
@@ -65,7 +65,7 @@ std::shared_ptr<const Gene> assembleFromJson(const nlohmann::json& geneInfoJson)
     }
 }
 
-void extractFlatGeneValueJsonRecursionHelper(const Gene& gene, nlohmann::json& workingData) {
+void extractFlatGeneValueJsonRecursionHelper(const Gene& gene, ParamsType& workingData) {
     if (gene.isLeaf()) {
         auto element = gene.getGeneElement();
         workingData[element->getId()] = element->valueAsJson();
@@ -76,8 +76,8 @@ void extractFlatGeneValueJsonRecursionHelper(const Gene& gene, nlohmann::json& w
     }
 }
 
-nlohmann::json extractFlatGeneValueJson(const Gene &gene) {
-    nlohmann::json rv;
+ParamsType extractFlatGeneValueJson(const Gene &gene) {
+    ParamsType rv;
     extractFlatGeneValueJsonRecursionHelper(gene, rv);
     return rv;
 }

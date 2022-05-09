@@ -10,7 +10,7 @@ struct EvolutionResult {
     int numberOfIterations;
     double timePassedSeconds;
     double topFitnessValue;
-    std::shared_ptr<const nlohmann::json> topGeneJson;
+    std::shared_ptr<const ParamsType> topGeneJson;
 };
 
 }

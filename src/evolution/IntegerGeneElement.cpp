@@ -40,7 +40,7 @@ std::shared_ptr<GeneElement> IntegerGeneElement::clone() const {
     return std::make_shared<IntegerGeneElement>(getId(), minValue, maxValue, value);
 }
 
-nlohmann::json IntegerGeneElement::valueAsJson() const {
+ParamsType IntegerGeneElement::valueAsJson() const {
     return value;
 }
 }

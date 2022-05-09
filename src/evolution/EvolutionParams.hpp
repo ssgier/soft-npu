@@ -7,7 +7,7 @@ namespace soft_npu {
 
 struct EvolutionParams {
 
-    double abortAfterSeconds = 60;
+    double abortAfterSeconds = 6000;
     int maxNumIterations = -1;
     double targetFitnessValue = std::numeric_limits<double>::lowest();
 

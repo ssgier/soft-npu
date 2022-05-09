@@ -22,11 +22,11 @@ public:
     double getFitness() const;
     double getFitnessProxy() const;
     std::shared_ptr<const Gene> getGene() const;
-    std::shared_ptr<const nlohmann::json> getGeneValueJson() const;
+    std::shared_ptr<const ParamsType> getGeneValueJson() const;
 
 private:
     std::shared_ptr<const Gene> gene;
-    std::shared_ptr<const nlohmann::json> geneValueJson;
+    std::shared_ptr<const ParamsType> geneValueJson;
 
     const FitnessFunction& proxyFitnessFunction;
     const FitnessFunction& mainFitnessFunction;
