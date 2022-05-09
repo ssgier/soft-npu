@@ -38,7 +38,7 @@ std::shared_ptr<GeneElement> RealNumberGeneElement::clone() const {
     return std::make_shared<RealNumberGeneElement>(getId(), minValue, maxValue, value);
 }
 
-nlohmann::json RealNumberGeneElement::valueAsJson() const {
+ParamsType RealNumberGeneElement::valueAsJson() const {
     return value;
 }
 

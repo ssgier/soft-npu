@@ -16,7 +16,7 @@ public:
     std::shared_ptr<GeneElement> mutate(double mutationStrength, RandomEngineType&) const override;
     std::shared_ptr<GeneElement> clone() const override;
 
-    nlohmann::json valueAsJson() const override;
+    ParamsType valueAsJson() const override;
 
 private:
     int minValue;

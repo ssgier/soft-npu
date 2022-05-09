@@ -8,7 +8,7 @@ namespace soft_npu {
 Candidate::Candidate(std::shared_ptr<const Gene> gene, const FitnessFunction& proxyFitnessFunction,
                      const FitnessFunction& mainFitnessFunction):
                      gene(gene),
-                     geneValueJson(std::make_shared<nlohmann::json>(GeneOperationUtils::extractFlatGeneValueJson(*gene))),
+                     geneValueJson(std::make_shared<ParamsType>(GeneOperationUtils::extractFlatGeneValueJson(*gene))),
                      proxyFitnessFunction(proxyFitnessFunction),
                      mainFitnessFunction(mainFitnessFunction) {
 
@@ -50,7 +50,7 @@ std::shared_ptr<const Gene> Candidate::getGene() const {
     return gene;
 }
 
-std::shared_ptr<const nlohmann::json> Candidate::getGeneValueJson() const {
+std::shared_ptr<const ParamsType> Candidate::getGeneValueJson() const {
     return geneValueJson;
 }
 }

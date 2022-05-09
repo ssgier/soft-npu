@@ -20,7 +20,7 @@ std::shared_ptr<GeneElement> BooleanGeneElement::clone() const {
     return std::make_shared<BooleanGeneElement>(getId(), value);
 }
 
-nlohmann::json BooleanGeneElement::valueAsJson() const {
+ParamsType BooleanGeneElement::valueAsJson() const {
     return value;
 }
 }

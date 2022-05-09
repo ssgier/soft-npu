@@ -170,7 +170,7 @@ EvolutionResult Evolution::runImpl(
     const EvolutionParams& evolutionParams,
     const FitnessFunction& proxyFitnessFunction,
     const FitnessFunction& mainFitnessFunction,
-    const nlohmann::json& geneInfoJson) {
+    const ParamsType& geneInfoJson) {
 
     PLOG_INFO << "Running with evo params: " << std::endl << evolutionParams;
 
