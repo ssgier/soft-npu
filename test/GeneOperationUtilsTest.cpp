@@ -238,8 +238,8 @@ TEST(GeneOperationUtilsTest, JsonTransformations) {
 }
 )"_json;
 
-    auto gene = GeneOperationUtils::assembleFromJson(geneInfoJson);
-    auto actualFlatValueJson = GeneOperationUtils::extractFlatGeneValueJson(*gene);
+    auto gene = GeneOperationUtils::assembleFromInfo(geneInfoJson);
+    auto actualFlatValueJson = GeneOperationUtils::extractFlatGeneValue(*gene);
 
     ASSERT_EQ(actualFlatValueJson, expectedFlatValueJson);
 }

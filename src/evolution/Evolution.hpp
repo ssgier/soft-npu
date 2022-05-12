@@ -12,37 +12,31 @@ template<typename F>
 struct FitnessEval : public FitnessFunction {
     explicit FitnessEval(F&& evalFunction) : evalFunction(std::forward<F>(evalFunction)) {}
 
-    double evaluate(const ParamsType& geneValueJson) const override {
-        return evalFunction(geneValueJson);
+    double evaluate(const ParamsType& geneValue, SizeType seed) const override {
+        return evalFunction(geneValue, seed);
     }
 
     const F evalFunction;
 };
 
-template<typename ProxyFitnessEvalType, typename MainFitnessEvalType>
+template<typename FitnessEvalType>
 EvolutionResult run(
     const EvolutionParams& evolutionParams,
-    ProxyFitnessEvalType&& proxyFitnessEval,
-    MainFitnessEvalType&& mainFitnessEval,
+    FitnessEvalType&& fitnessEval,
     const ParamsType& geneInfoJson) {
 
-    auto proxyFitnessFunction = std::make_unique<FitnessEval<ProxyFitnessEvalType>>(
-        std::forward<ProxyFitnessEvalType>(proxyFitnessEval));
-
-    auto mainFitnessFunction = std::make_unique<FitnessEval<MainFitnessEvalType>>(
-        std::forward<MainFitnessEvalType>(mainFitnessEval));
+    auto fitnessFunction = std::make_unique<FitnessEval<FitnessEvalType>>(
+        std::forward<FitnessEvalType>(fitnessEval));
 
     return runImpl(
         evolutionParams,
-        *proxyFitnessFunction,
-        *mainFitnessFunction,
+        *fitnessFunction,
         geneInfoJson);
 }
 
 EvolutionResult runImpl(
     const EvolutionParams& evolutionParams,
-    const FitnessFunction& proxyFitnessFunction,
-    const FitnessFunction& mainFitnessFunction,
+    const FitnessFunction& fitnessFunction,
     const ParamsType& geneInfoJson);
 }
 

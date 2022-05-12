@@ -3,6 +3,8 @@
 #include <chrono>
 #include <algorithm>
 #include "Candidate.hpp"
+#include "CandidateWithFitness.hpp"
+#include "SelectionUtils.hpp"
 #include "GeneOperationUtils.hpp"
 #include <execution>
 #include <plog/Log.h>
@@ -12,13 +14,12 @@
 
 namespace soft_npu {
 
-using CandidateVector = std::vector<std::shared_ptr<Candidate>>;
+using Candidates = std::vector<std::shared_ptr<const Candidate>>;
+using EvaluatedCandidates = std::vector<CandidateWithFitness>;
 
 void validateEvolutionParams(const EvolutionParams& params) {
-    if (params.proxyPopulationSize <= params.mainPopulationSize) {
-        throw std::runtime_error("Proxy population size must be larger than main population size");
-    } else if (params.mainPopulationSize <= params.elitePopulationSize) {
-        throw std::runtime_error("Main population size must be larger than elite population size");
+    if (params.populationSize <= params.eliteSize) {
+        throw std::runtime_error("Population size must be larger than elite size");
     } else if (params.maxMutationProbability < params.minMutationProbability || params.minMutationProbability < 0 ||
                 params.maxMutationProbability > 1) {
         throw std::runtime_error("Following inequality must hold: 0 <= min mutation probability <= max mutation probability <= 1");
@@ -28,8 +29,8 @@ void validateEvolutionParams(const EvolutionParams& params) {
         throw std::runtime_error("Mutation strength must not be negative");
     } else if (params.crossoverProbability < 0 || params.crossoverProbability > 1) {
         throw std::runtime_error("Crossover probability must not be less than zero or greater than 1");
-    } else if (params.elitePopulationSize <= 0) {
-        throw std::runtime_error("Population sizes must be strictly positive");
+    } else if (params.tournamentSelectionProbability < 0 || params.tournamentSelectionProbability > 1) {
+        throw std::runtime_error("Tournament selection probability must be in [0, 1]");
     }
 }
 
@@ -61,155 +62,133 @@ bool hasTimeLimitPassed(const std::chrono::time_point<T> & startTs, const Evolut
     return duration.count() > evolutionParams.abortAfterSeconds;
 }
 
-void sortPopulation(std::vector<std::shared_ptr<Candidate>>& population) {
-    std::sort(population.begin(), population.end(), [](auto candidate0, auto candidate1) {
-        return candidate0->getFitness() <  candidate1->getFitness();
+void sortCandidates(EvaluatedCandidates& population) {
+    std::sort(population.begin(), population.end(), [](const auto& candidate0, const auto& candidate1) {
+        return candidate0.fitnessValue <  candidate1.fitnessValue;
     });
 }
 
 std::shared_ptr<Candidate> createOffspring(
     const EvolutionParams& evolutionParams,
-    const FitnessFunction& proxyFitnessFunction,
-    const FitnessFunction& mainFitnessFunction,
-    const CandidateVector& elitePopulation,
+    const EvaluatedCandidates& evaluatedCandidatesSorted,
     RandomEngineType& randomEngine
     ) {
 
-    GeneVector genes;
-    std::transform(elitePopulation.cbegin(), elitePopulation.cend(), std::back_inserter(genes),
-                   [&randomEngine, &evolutionParams](auto candidate) {
-        return candidate->getGene()->mutate(generateMutationParams(randomEngine, evolutionParams), randomEngine);
-    });
+    GeneVector mutatedGenesSorted;
+   
+    std::transform(
+            evaluatedCandidatesSorted.cbegin(),
+            evaluatedCandidatesSorted.cend(),
+            std::back_inserter(mutatedGenesSorted),
+            [&evolutionParams, &randomEngine] (const auto& candidateWithFitness) {
+                return candidateWithFitness.candidate->getGene()->mutate(
+                        generateMutationParams(randomEngine, evolutionParams), randomEngine);
+            });
 
-    auto offspringGene = GeneOperationUtils::crossover(evolutionParams, genes, randomEngine);
+    SizeType numParents = 2;
+    GeneVector parentGenes;
+    for (SizeType i = 0; i < numParents; ++i) {
+        auto parentIndex = SelectionUtils::selectParentIndex(evolutionParams, randomEngine);
+        parentGenes.push_back(mutatedGenesSorted[parentIndex]);
+    }
 
-    return std::make_shared<Candidate>(offspringGene, proxyFitnessFunction, mainFitnessFunction);
+    auto offspringGene = GeneOperationUtils::crossover(evolutionParams, parentGenes, randomEngine);
+
+    return std::make_shared<Candidate>(offspringGene);
 }
 
-void evaluateFitness(std::vector<std::shared_ptr<Candidate>>& candidates) {
+EvaluatedCandidates evaluateFitness(
+        const Candidates& candidates,
+        const FitnessFunction& fitnessFunction,
+        RandomEngineType& randomEngine) {
+
+    EvaluatedCandidates result;
+
+    std::transform(
+            candidates.cbegin(),
+            candidates.cend(),
+            std::back_inserter(result),
+            [](auto candidate) {
+                CandidateWithFitness candidateWithFitness;
+                candidateWithFitness.candidate = candidate;
+                candidateWithFitness.fitnessValue = std::numeric_limits<ValueType>::quiet_NaN();
+                return candidateWithFitness;
+            });
+
     std::for_each(
-        std::execution::par,
-        candidates.cbegin(),
-        candidates.cend(),
-        [](auto candidate) {
-            candidate->evaluateFitness();
-        });
+            std::execution::par,
+            result.begin(),
+            result.end(),
+            [&fitnessFunction, &randomEngine](auto& candidateWithFitness) {
+                candidateWithFitness.fitnessValue = fitnessFunction.evaluate(
+                        *candidateWithFitness.candidate->getGeneValue(), randomEngine());
+            });
+
+    return result;
 }
 
 void iterate(
     const EvolutionParams& evolutionParams,
-    const FitnessFunction& proxyFitnessFunction,
-    const FitnessFunction& mainFitnessFunction,
-    std::vector<std::shared_ptr<Candidate>>& elitePopulation,
+    const FitnessFunction& fitnessFunction,
+    EvaluatedCandidates& evaluatedCandidatesSorted,
     RandomEngineType& randomEngine
 ) {
-    std::vector<std::shared_ptr<Candidate>> proxyPopulation;
-    proxyPopulation.reserve(evolutionParams.proxyPopulationSize);
+    Candidates newGenerationCandidates;
 
-    for (int i = 0; i < evolutionParams.proxyPopulationSize; ++ i) {
-        proxyPopulation.push_back(createOffspring(evolutionParams, proxyFitnessFunction, mainFitnessFunction,
-                                                  elitePopulation, randomEngine));
+    for (SizeType i = 0; i < evolutionParams.eliteSize; ++i) {
+        newGenerationCandidates.push_back(evaluatedCandidatesSorted[i].candidate);
     }
 
-    PLOG_DEBUG << "Evaluating proxy population fitness";
-
-    std::for_each(
-        std::execution::par,
-        proxyPopulation.cbegin(),
-        proxyPopulation.cend(),
-        [](auto candidate) {
-            candidate->evaluateFitnessProxy();
-        });
-
-    std::nth_element(
-        proxyPopulation.begin(),
-        proxyPopulation.begin() + evolutionParams.mainPopulationSize,
-        proxyPopulation.end(),
-        [](auto candidate0, auto candidate1) {
-            return candidate0->getFitnessProxy() < candidate1->getFitnessProxy();
-        });
-
-    std::vector<std::shared_ptr<Candidate>> mainPopulation;
-
-    std::copy_n(
-        proxyPopulation.cbegin(),
-        evolutionParams.mainPopulationSize,
-        std::back_inserter(mainPopulation));
-
-    auto cmp = [](auto c0, auto c1) {
-        return c0->getFitnessProxy() < c1->getFitnessProxy();
-    };
-
-    PLOG_DEBUG << "Best proxy fitness in main population: "
-        << (*std::min_element(mainPopulation.cbegin(), mainPopulation.cend(), cmp))->getFitnessProxy()
-        << ", worst proxy fitness in main population: "
-        << (*std::max_element(mainPopulation.cbegin(), mainPopulation.cend(), cmp))->getFitnessProxy();
+    while (newGenerationCandidates.size() < evolutionParams.populationSize) {
+        newGenerationCandidates.push_back(createOffspring(evolutionParams, evaluatedCandidatesSorted, randomEngine));
+    }
 
     PLOG_DEBUG << "Evaluating main population fitness";
 
-    evaluateFitness(mainPopulation);
+    EvaluatedCandidates evaluatedNewCandidates = evaluateFitness(
+            newGenerationCandidates,
+            fitnessFunction,
+            randomEngine);
 
-    std::copy(
-        elitePopulation.cbegin(),
-        elitePopulation.cend(),
-        std::back_inserter(mainPopulation));
-
-    std::partial_sort(
-        mainPopulation.begin(),
-        mainPopulation.begin() + evolutionParams.elitePopulationSize,
-        mainPopulation.end(),
-        [](auto candidate0, auto candidate1) {
-            return candidate0->getFitness() < candidate1->getFitness();
-        });
-
-    elitePopulation.clear();
-    std::copy_n(mainPopulation.cbegin(), evolutionParams.elitePopulationSize, std::back_inserter(elitePopulation));
+    evaluatedCandidatesSorted = evaluatedNewCandidates;
 }
 
 EvolutionResult Evolution::runImpl(
     const EvolutionParams& evolutionParams,
-    const FitnessFunction& proxyFitnessFunction,
-    const FitnessFunction& mainFitnessFunction,
+    const FitnessFunction& fitnessFunction,
     const ParamsType& geneInfoJson) {
 
     PLOG_INFO << "Running with evo params: " << std::endl << evolutionParams;
 
-    auto prototypeGene = GeneOperationUtils::assembleFromJson(geneInfoJson);
+    auto prototypeGene = GeneOperationUtils::assembleFromInfo(geneInfoJson);
 
     auto startTs = std::chrono::high_resolution_clock::now();
 
     validateEvolutionParams(evolutionParams);
 
-    std::vector<std::shared_ptr<Candidate>> elitePopulation;
+    Candidates population;
 
     RandomEngineType randomEngine(0);
 
-    auto originCandidate = std::make_shared<Candidate>(
-            prototypeGene->clone(),
-            proxyFitnessFunction,
-            mainFitnessFunction);
+    auto originCandidate = std::make_shared<Candidate>(prototypeGene->clone());
 
-    elitePopulation.push_back(originCandidate);
+    population.push_back(originCandidate);
 
-    for (auto i = 1; i < evolutionParams.elitePopulationSize; ++i) {
-
-        elitePopulation.push_back(std::make_shared<Candidate>(
-                originCandidate->getGene()->mutate(generateMutationParams(randomEngine, evolutionParams), randomEngine),
-                proxyFitnessFunction,
-                mainFitnessFunction));
+    for (SizeType i = 1; i < evolutionParams.populationSize; ++i) {
+        population.push_back(std::make_shared<Candidate>(
+                originCandidate->getGene()->mutate(generateMutationParams(randomEngine, evolutionParams), randomEngine)));
     }
 
-    PLOG_DEBUG << "Evaluating fitness of initial elite population";
-
-    evaluateFitness(elitePopulation);
-    sortPopulation(elitePopulation);
+    auto evaluatedCandidates = evaluateFitness(population, fitnessFunction, randomEngine);
 
     TerminationReason terminationReason;
     int iteration = 0;
 
     while (true) {
 
-        if (elitePopulation[0]->getFitness() <= evolutionParams.targetFitnessValue) {
+        sortCandidates(evaluatedCandidates);
+
+        if (evaluatedCandidates.front().fitnessValue <= evolutionParams.targetFitnessValue) {
             terminationReason = TerminationReason::targetFitnessValueReached;
             break;
         }
@@ -228,13 +207,12 @@ EvolutionResult Evolution::runImpl(
 
         iterate(
             evolutionParams,
-            proxyFitnessFunction,
-            mainFitnessFunction,
-            elitePopulation,
+            fitnessFunction,
+            evaluatedCandidates,
             randomEngine);
 
-        PLOG_INFO << "Iteration completed. Best elite fitness: " << elitePopulation.front()->getFitness()
-            << ", worst elite fitness: " << elitePopulation.back()->getFitness();
+        PLOG_INFO << "Iteration completed. Best fitness value: " << evaluatedCandidates.front().fitnessValue
+            << ", worst fitness value: " << evaluatedCandidates.back().fitnessValue;
 
         ++ iteration;
     }
@@ -244,10 +222,10 @@ EvolutionResult Evolution::runImpl(
 
     EvolutionResult result;
     result.terminationReason = terminationReason;
-    result.topFitnessValue = elitePopulation[0]->getFitness();
+    result.topFitnessValue = evaluatedCandidates.front().fitnessValue;
     result.timePassedSeconds = duration.count() * 1e-3;
     result.numberOfIterations = iteration;
-    result.topGeneJson = elitePopulation[0]->getGeneValueJson();
+    result.topGeneValue = evaluatedCandidates.front().candidate->getGeneValue();
 
     PLOG_INFO << "Evolution terminated, reason: " << toString(terminationReason)
         << ", achieved fitness value: " << result.topFitnessValue;

@@ -1,3 +1,4 @@
+#include <Aliases.hpp>
 #include <libcmaes/pwq_bound_strategy.h>
 #include <libcmaes/genopheno.h>
 #include <libcmaes/cmaparameters.h>
@@ -92,10 +93,10 @@ ParamsType enrichGeneInfoTemplate(const ParamsType &paramsTemplate, const Params
     }
 }
 
-ParamsType extractParamsFromFlatValueJson(const ParamsType& paramsTemplate, const ParamsType& flatValueJson) {
+ParamsType extractParamsFromFlatValue(const ParamsType& paramsTemplate, const ParamsType& flatValue) {
 
     ParamsType mergedParams(paramsTemplate);
-    for (auto& [id, value] : flatValueJson.items()) {
+    for (auto& [id, value] : flatValue.items()) {
         auto& paramValue = getRef(mergedParams, splitString(id), 0);
         paramValue = value;
     }
@@ -103,7 +104,7 @@ ParamsType extractParamsFromFlatValueJson(const ParamsType& paramsTemplate, cons
     return mergedParams;
 }
 
-double evaluateSingle(const ParamsType& params_, int seed, double simulationTime) {
+double evaluateFitnessFunction(const ParamsType& params_, int seed, double simulationTime) {
     auto params = std::make_shared<ParamsType>(params_);
     (*params)["simulation"]["untilTime"] = simulationTime;
     (*params)["simulation"]["seed"] = seed;
@@ -116,47 +117,25 @@ double evaluateSingle(const ParamsType& params_, int seed, double simulationTime
     return simulation.optimResultHolder.objFuncVal;
 }
 
-double evaluateFitnessFunction(const ParamsType& params, double simulationTime) {
-    int numSeedsPerCandidate = 10;
-
-    std::vector<SizeType> seeds(numSeedsPerCandidate);
-    std::iota(seeds.begin(), seeds.end(), 10);
-
-    std::vector<double> individualObjVals(seeds.size());
-
-    for (int i = 0; i < numSeedsPerCandidate; ++i) {
-        individualObjVals[i] = evaluateSingle(params, seeds[i], simulationTime);
-    }
-
-    double avgObjValue = std::accumulate(individualObjVals.cbegin(), individualObjVals.cend(), 0.0) / individualObjVals.size();
-
-    return avgObjValue;
-}
-
-EvolutionWrapperResult EvolutionWrapper::run(const ParamsType &paramsTemplate, const ParamsType &geneInfoTemplate,
+EvolutionWrapperResult EvolutionWrapper::run(const ParamsType& paramsTemplate, const ParamsType &geneInfoTemplate,
                                              const EvolutionParams &evolutionParams) {
-    auto geneInfoJson = enrichGeneInfoTemplate(paramsTemplate, geneInfoTemplate);
+    auto geneInfoValue = enrichGeneInfoTemplate(paramsTemplate, geneInfoTemplate);
 
     double simulationTime = paramsTemplate["simulation"]["untilTime"].get<double>();
 
-    auto proxyFitnessFunction = [](auto) {
-        return -1;
-    };
-
-    auto mainFitnessFunction = [&paramsTemplate, simulationTime](auto flatValueJson) {
-        return evaluateFitnessFunction(extractParamsFromFlatValueJson(paramsTemplate, flatValueJson), simulationTime);
+    auto fitnessFunction = [&paramsTemplate, simulationTime](auto flatValue, auto seed) {
+        return evaluateFitnessFunction(extractParamsFromFlatValue(paramsTemplate, flatValue), seed, simulationTime);
     };
 
     auto evolutionResult = Evolution::run(
         evolutionParams,
-        proxyFitnessFunction,
-        mainFitnessFunction,
-        geneInfoJson
+        fitnessFunction,
+        geneInfoValue
         );
 
     EvolutionWrapperResult result;
     result.evolvedParams = std::make_shared<ParamsType>(
-        extractParamsFromFlatValueJson(paramsTemplate, *evolutionResult.topGeneJson));
+        extractParamsFromFlatValue(paramsTemplate, *evolutionResult.topGeneValue));
     result.fitnessValue = evolutionResult.topFitnessValue;
 
     return result;
@@ -165,14 +144,14 @@ EvolutionWrapperResult EvolutionWrapper::run(const ParamsType &paramsTemplate, c
 EvolutionParams extractFromBuffer(const double* buf) {
     EvolutionParams evolutionParams;
 
-    evolutionParams.elitePopulationSize = std::max(1, static_cast<int>(buf[0]));
-    evolutionParams.mainPopulationSize = evolutionParams.elitePopulationSize * buf[1];
-    evolutionParams.proxyPopulationSize = evolutionParams.mainPopulationSize + 1;
+    evolutionParams.eliteSize = std::max(1, static_cast<int>(buf[0]));
+    evolutionParams.populationSize = evolutionParams.eliteSize * buf[1];
     evolutionParams.minMutationProbability = buf[2];
     evolutionParams.maxMutationProbability = buf[2] + (1 - buf[2]) * buf[3];
     evolutionParams.minMutationStrength = buf[4];
     evolutionParams.maxMutationStrength = buf[4] + (1 - buf[4]) * buf[5];
     evolutionParams.crossoverProbability = buf[6];
+    evolutionParams.tournamentSelectionProbability = buf[7];
 
     return evolutionParams;
 }
@@ -183,9 +162,9 @@ EvolutionWrapper::calibrate(const ParamsType &paramsTemplate, const ParamsType &
 
     // TODO: move numbers to config
 
-    std::vector<double> x0 = {5, 10, 0.0, 0.9, 0.0, 0.45, 0.5};
-    std::vector<double> lbounds = {1, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0};
-    std::vector<double> ubounds = {20, 20, 1.0, 1.0, 1.0, 1.0, 1.0};
+    std::vector<double> x0 = {5, 10, 0.0, 0.9, 0.0, 0.45, 0.5, 0.75};
+    std::vector<double> lbounds = {1, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5};
+    std::vector<double> ubounds = {20, 20, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 
     GenoPheno<pwqBoundStrategy> gp(lbounds.data(), ubounds.data(), x0.size());
     CMAParameters<GenoPheno<pwqBoundStrategy>> cmaparams(x0, 0.1, -1, 1, gp);

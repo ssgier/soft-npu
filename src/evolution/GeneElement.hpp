@@ -18,7 +18,7 @@ public:
     virtual std::shared_ptr<GeneElement> clone() const = 0;
     virtual ~GeneElement() = default;
 
-    virtual ParamsType valueAsJson() const = 0;
+    virtual ParamsType value() const = 0;
 
 private:
     std::string id;

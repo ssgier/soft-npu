@@ -16,9 +16,9 @@ std::shared_ptr<const Gene> crossover(
     RandomEngineType &randomEngine
 );
 
-std::shared_ptr<const Gene> assembleFromJson(const ParamsType& geneInfoJson);
+std::shared_ptr<const Gene> assembleFromInfo(const ParamsType& geneInfoJson);
 
-ParamsType extractFlatGeneValueJson(const Gene& gene);
+ParamsType extractFlatGeneValue(const Gene& gene);
 
 }
 }

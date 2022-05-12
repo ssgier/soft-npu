@@ -16,12 +16,12 @@ public:
     std::shared_ptr<GeneElement> mutate(double mutationStrength, RandomEngineType&) const override;
     std::shared_ptr<GeneElement> clone() const override;
 
-    ParamsType valueAsJson() const override;
+    ParamsType value() const override;
 
 private:
     double minValue;
     double maxValue;
-    double value;
+    double value_;
 };
 
 }

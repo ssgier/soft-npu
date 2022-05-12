@@ -11,18 +11,18 @@ IntegerGeneElement::IntegerGeneElement(
     GeneElement(std::move(id)),
     minValue(minValue),
     maxValue(maxValue),
-    value(value)
+    value_(value)
     {
 }
 
 std::string IntegerGeneElement::getValueAsString() const {
-    return std::to_string(value);
+    return std::to_string(value_);
 }
 
 std::shared_ptr<GeneElement> IntegerGeneElement::mutate(double mutationStrength, RandomEngineType & randomEngine) const {
 
     double target = std::normal_distribution<double>(
-        value, mutationStrength * (maxValue - minValue))(randomEngine);
+        value_, mutationStrength * (maxValue - minValue))(randomEngine);
 
     int roundedTarget = std::round(target);
 
@@ -37,10 +37,10 @@ std::shared_ptr<GeneElement> IntegerGeneElement::mutate(double mutationStrength,
 }
 
 std::shared_ptr<GeneElement> IntegerGeneElement::clone() const {
-    return std::make_shared<IntegerGeneElement>(getId(), minValue, maxValue, value);
+    return std::make_shared<IntegerGeneElement>(getId(), minValue, maxValue, value_);
 }
 
-ParamsType IntegerGeneElement::valueAsJson() const {
-    return value;
+ParamsType IntegerGeneElement::value() const {
+    return value_;
 }
 }

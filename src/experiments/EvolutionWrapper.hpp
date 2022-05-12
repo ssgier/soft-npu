@@ -13,7 +13,7 @@ EvolutionWrapperResult run(
     const ParamsType& geneInfoTemplate,
     const EvolutionParams& evolutionParams);
 
-EvolutionParams calibrate(const ParamsType &paramsTemplate, const ParamsType &geneInfoTemplate,
+EvolutionParams calibrate(const ParamsType& paramsTemplate, const ParamsType &geneInfoTemplate,
           double abortTimeSeconds);
 
 }
