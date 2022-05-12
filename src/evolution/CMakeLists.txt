@@ -4,6 +4,7 @@ set(SOURCE
         ${CMAKE_CURRENT_SOURCE_DIR}/TerminationReason.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Candidate.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/GeneOperationUtils.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/SelectionUtils.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Gene.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/GeneElement.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/RealNumberGeneElement.cpp

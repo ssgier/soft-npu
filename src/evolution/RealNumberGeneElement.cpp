@@ -10,11 +10,11 @@ RealNumberGeneElement::RealNumberGeneElement(
     GeneElement(std::move(id)),
     minValue(minValue),
     maxValue(maxValue),
-    value(value) {
+    value_(value) {
 }
 
 std::string RealNumberGeneElement::getValueAsString() const {
-    return std::to_string(value);
+    return std::to_string(value_);
 }
 
 std::shared_ptr<GeneElement> RealNumberGeneElement::mutate(
@@ -24,7 +24,7 @@ std::shared_ptr<GeneElement> RealNumberGeneElement::mutate(
     double mutatedValue = std::max(
         minValue,
         std::min(maxValue,
-                 std::normal_distribution<double>(value, mutationStrength * (maxValue - minValue))(randomEngine)));
+                 std::normal_distribution<double>(value_, mutationStrength * (maxValue - minValue))(randomEngine)));
 
     return std::make_shared<RealNumberGeneElement>(
         getId(),
@@ -35,11 +35,11 @@ std::shared_ptr<GeneElement> RealNumberGeneElement::mutate(
 }
 
 std::shared_ptr<GeneElement> RealNumberGeneElement::clone() const {
-    return std::make_shared<RealNumberGeneElement>(getId(), minValue, maxValue, value);
+    return std::make_shared<RealNumberGeneElement>(getId(), minValue, maxValue, value_);
 }
 
-ParamsType RealNumberGeneElement::valueAsJson() const {
-    return value;
+ParamsType RealNumberGeneElement::value() const {
+    return value_;
 }
 
 

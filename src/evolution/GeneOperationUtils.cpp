@@ -18,67 +18,67 @@ std::shared_ptr<const Gene> crossover(
         evolutionParams, genes, randomEngine);
 }
 
-std::string getUnsupportedTypeErrorMsg(const ParamsType& json) {
+std::string getUnsupportedTypeErrorMsg(const ParamsType& value) {
     std::stringstream ss;
-    ss << "Unsupported json type: " << json.type_name() << " for json: " << json;
+    ss << "Unsupported type: " << value.type_name() << " for value: " << value;
     throw std::runtime_error(ss.str());
 }
 
-std::shared_ptr<GeneElement> extractGeneElement(const ParamsType& leafGeneInfoJson) {
-    std::string id = leafGeneInfoJson["id"];
-    const auto& prototypeValueJson = leafGeneInfoJson["prototypeValue"];
+std::shared_ptr<GeneElement> extractGeneElement(const ParamsType& leafGeneInfoValue) {
+    std::string id = leafGeneInfoValue["id"];
+    const auto& prototypeValue = leafGeneInfoValue["prototypeValue"];
 
-    if (prototypeValueJson.is_boolean()) {
-        return std::make_shared<BooleanGeneElement>(id, prototypeValueJson.get<bool>());
-    } else if (prototypeValueJson.is_number_float()) {
+    if (prototypeValue.is_boolean()) {
+        return std::make_shared<BooleanGeneElement>(id, prototypeValue.get<bool>());
+    } else if (prototypeValue.is_number_float()) {
 
-        double minValue = leafGeneInfoJson["minValue"].get<double>();
-        double maxValue = leafGeneInfoJson["maxValue"].get<double>();
-        double prototypeValue = prototypeValueJson.get<double>();
+        double minValue = leafGeneInfoValue["minValue"].get<double>();
+        double maxValue = leafGeneInfoValue["maxValue"].get<double>();
+        double prototypeValueDouble = prototypeValue.get<double>();
 
-        return std::make_shared<RealNumberGeneElement>(id, minValue, maxValue, prototypeValue);
-    } else if (prototypeValueJson.is_number_integer()) {
-        int minValue = leafGeneInfoJson["minValue"].get<int>();
-        int maxValue = leafGeneInfoJson["maxValue"].get<int>();
-        int prototypeValue = prototypeValueJson.get<int>();
+        return std::make_shared<RealNumberGeneElement>(id, minValue, maxValue, prototypeValueDouble);
+    } else if (prototypeValue.is_number_integer()) {
+        int minValue = leafGeneInfoValue["minValue"].get<int>();
+        int maxValue = leafGeneInfoValue["maxValue"].get<int>();
+        int prototypeValueInt = prototypeValue.get<int>();
 
-        return std::make_shared<IntegerGeneElement>(id, minValue, maxValue, prototypeValue);
+        return std::make_shared<IntegerGeneElement>(id, minValue, maxValue, prototypeValueInt);
     }
     else {
-        throw std::runtime_error(getUnsupportedTypeErrorMsg(prototypeValueJson));
+        throw std::runtime_error(getUnsupportedTypeErrorMsg(prototypeValue));
     }
 }
 
-std::shared_ptr<const Gene> assembleFromJson(const ParamsType& geneInfoJson) {
-    if (geneInfoJson.is_object()) {
-        return std::make_shared<Gene>(extractGeneElement(geneInfoJson));
-    } else if (geneInfoJson.is_array()) {
+std::shared_ptr<const Gene> assembleFromInfo(const ParamsType& geneInfoValue) {
+    if (geneInfoValue.is_object()) {
+        return std::make_shared<Gene>(extractGeneElement(geneInfoValue));
+    } else if (geneInfoValue.is_array()) {
         GeneVector geneVector;
 
-        std::transform(geneInfoJson.cbegin(), geneInfoJson.cend(), std::back_inserter(geneVector), [](auto subJson) {
-            return assembleFromJson(subJson);
+        std::transform(geneInfoValue.cbegin(), geneInfoValue.cend(), std::back_inserter(geneVector), [](auto subInfo) {
+            return assembleFromInfo(subInfo);
         });
 
         return std::make_shared<Gene>(std::move(geneVector));
     } else {
-        throw std::runtime_error(getUnsupportedTypeErrorMsg(geneInfoJson));
+        throw std::runtime_error(getUnsupportedTypeErrorMsg(geneInfoValue));
     }
 }
 
-void extractFlatGeneValueJsonRecursionHelper(const Gene& gene, ParamsType& workingData) {
+void extractFlatGeneValueRecursionHelper(const Gene& gene, ParamsType& workingData) {
     if (gene.isLeaf()) {
         auto element = gene.getGeneElement();
-        workingData[element->getId()] = element->valueAsJson();
+        workingData[element->getId()] = element->value();
     } else {
         std::for_each(gene.cbeginSubGenes(), gene.cendSubGenes(), [&workingData](auto subGene) {
-            extractFlatGeneValueJsonRecursionHelper(*subGene, workingData);
+            extractFlatGeneValueRecursionHelper(*subGene, workingData);
         });
     }
 }
 
-ParamsType extractFlatGeneValueJson(const Gene &gene) {
+ParamsType extractFlatGeneValue(const Gene &gene) {
     ParamsType rv;
-    extractFlatGeneValueJsonRecursionHelper(gene, rv);
+    extractFlatGeneValueRecursionHelper(gene, rv);
     return rv;
 }
 

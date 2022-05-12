@@ -14,9 +14,9 @@ public:
     std::shared_ptr<GeneElement> mutate(double mutationStrength, RandomEngineType&) const override;
     std::shared_ptr<GeneElement> clone() const override;
 
-    ParamsType valueAsJson() const override;
+    ParamsType value() const override;
 private:
-    bool value;
+    bool value_;
 };
 
 }
