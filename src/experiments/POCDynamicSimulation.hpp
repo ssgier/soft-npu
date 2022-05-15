@@ -17,7 +17,8 @@ public:
 
     OptimResultHolder optimResultHolder;
     ValueType rewardDosage;
-    long abortAfterNumSynapticTransmissions;
+    ValueType abortAfterWallSeconds;
+    ValueType costAfterWallSeconds;
     bool flipDetectorChannels;
 };
 

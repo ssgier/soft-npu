@@ -86,7 +86,8 @@
   },
   "pocDynamicSimulation": {
     "rewardDosage": 2.0,
-    "abortAfterNumSynapticTransmissions": 300e6,
+    "abortAfterWallSeconds": 20,
+    "costAfterWallSeconds": 10,
     "flipDetectorChannels": false
   }
 }
