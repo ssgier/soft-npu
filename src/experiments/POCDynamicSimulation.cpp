@@ -10,6 +10,7 @@
 #include "DetectionCorrectnessStats.hpp"
 #include "EnvEvent.hpp"
 #include <core/SynapticTransmissionStats.hpp>
+#include <chrono>
 
 namespace soft_npu {
 
@@ -17,7 +18,8 @@ POCDynamicSimulation::POCDynamicSimulation(std::shared_ptr<const ParamsType> par
     AbstractSimulation(params),
     optimResultHolder(),
     rewardDosage((*params)["pocDynamicSimulation"]["rewardDosage"]),
-    abortAfterNumSynapticTransmissions((*params)["pocDynamicSimulation"]["abortAfterNumSynapticTransmissions"]),
+    abortAfterWallSeconds((*params)["pocDynamicSimulation"]["abortAfterWallSeconds"]),
+    costAfterWallSeconds((*params)["pocDynamicSimulation"]["costAfterWallSeconds"]),
     flipDetectorChannels((*params)["pocDynamicSimulation"]["flipDetectorChannels"]) {
 }
 
@@ -88,11 +90,21 @@ std::unique_ptr<StimulusLearningInfo> makeStimulusLearningInfo(
     return slInfo;
 }
 
+using namespace std::chrono;
+
+template<typename T>
+ValueType getWallTimeSeconds(T startTs) {
+    
+    auto endTs = high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTs - startTs);
+    return duration.count() * 1e-3;
+}
+
 void POCDynamicSimulation::runController(
         CycleController &controller,
         Population&,
         TimeType simulationTime,
-        SynapticTransmissionStats& synapticTransmissionStats
+        SynapticTransmissionStats&
         ) {
 
     TimeType currentTime;
@@ -124,6 +136,8 @@ void POCDynamicSimulation::runController(
 
     PLOG_DEBUG << "Starting main loop";
 
+    auto startTs = high_resolution_clock::now();
+
     for (SizeType iterCount = 0; (currentTime = controller.getTime()) <  simulationTime; ++ iterCount) {
 
         cycleInputBuffer.reset();
@@ -136,9 +150,7 @@ void POCDynamicSimulation::runController(
 
         controller.runCycle();
 
-        if (synapticTransmissionStats.getTransmissionCount() > abortAfterNumSynapticTransmissions) {
-            PLOG_INFO << "Max num transmission events of " << abortAfterNumSynapticTransmissions
-                << " breached. Aborting.";
+        if (getWallTimeSeconds(startTs) > abortAfterWallSeconds) {
             optimResultHolder.objFuncVal = std::numeric_limits<double>::max();
             return;
         }
@@ -152,6 +164,8 @@ void POCDynamicSimulation::runController(
         }
     }
 
+    auto wallTimeSeconds = getWallTimeSeconds(startTs);
+
     auto totalNumDetectionTrials =
             detectionCorrectnessStats.numCorrectDetections + detectionCorrectnessStats.numWrongDetections + detectionCorrectnessStats.numAbstinences;
 
@@ -162,9 +176,14 @@ void POCDynamicSimulation::runController(
     PLOG_DEBUG << "Total num detection trials: " << totalNumDetectionTrials << std::endl
         << "correct: " << 100.0 * partCorrect << " %" << std::endl
         << "wrong: " << 100.0 * partWrong << " %" << std::endl
-        << "abstained: " << 100.0 * partAbstained << " %" << std::endl;
+        << "abstained: " << 100.0 * partAbstained << " %" << std::endl
+        << "wall time: " << wallTimeSeconds << " seconds" << std::endl;
 
-    double objCandidate = 1 - partCorrect + partWrong;
+    double timePart = std::max(0.0, (wallTimeSeconds - costAfterWallSeconds) / costAfterWallSeconds);
+
+    PLOG_DEBUG << "time in seconds = " << wallTimeSeconds;
+    PLOG_DEBUG << "time part = " << timePart;
+    double objCandidate = 1 - partCorrect + partWrong + timePart;
 
     optimResultHolder.objFuncVal = objCandidate;
 }

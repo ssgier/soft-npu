@@ -188,6 +188,9 @@ EvolutionResult Evolution::runImpl(
 
         sortCandidates(evaluatedCandidates);
 
+        PLOG_INFO << "Iteration completed. Best fitness value: " << evaluatedCandidates.front().fitnessValue
+            << ", worst fitness value: " << evaluatedCandidates.back().fitnessValue;
+
         if (evaluatedCandidates.front().fitnessValue <= evolutionParams.targetFitnessValue) {
             terminationReason = TerminationReason::targetFitnessValueReached;
             break;
@@ -210,9 +213,6 @@ EvolutionResult Evolution::runImpl(
             fitnessFunction,
             evaluatedCandidates,
             randomEngine);
-
-        PLOG_INFO << "Iteration completed. Best fitness value: " << evaluatedCandidates.front().fitnessValue
-            << ", worst fitness value: " << evaluatedCandidates.back().fitnessValue;
 
         ++ iteration;
     }
