@@ -17,6 +17,7 @@ std::string toString(TerminationReason terminationReason) {
         case TerminationReason::targetFitnessValueReached: return "target fitness value reached";
         case TerminationReason::maxNumIterationsReached:   return "max number of iterations reached";
         case TerminationReason::timeLimitPassed:           return "time limit passed";
+        case TerminationReason::interruptSignalReceived:       return "interrupt signal received";
         default:
             std::stringstream ss;
             ss << "Unsupported enum value: " << terminationReason;
