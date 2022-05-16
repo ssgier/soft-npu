@@ -11,6 +11,7 @@
 #include <Aliases.hpp>
 #include "Gene.hpp"
 #include "MutationParams.hpp"
+#include <util/InterruptSignalChecker.hpp>
 
 namespace soft_npu {
 
@@ -190,6 +191,11 @@ EvolutionResult Evolution::runImpl(
 
         PLOG_INFO << "Iteration completed. Best fitness value: " << evaluatedCandidates.front().fitnessValue
             << ", worst fitness value: " << evaluatedCandidates.back().fitnessValue;
+
+        if (InterruptSignalChecker::wasSent()) {
+            terminationReason = TerminationReason::interruptSignalReceived;
+            break;
+        }
 
         if (evaluatedCandidates.front().fitnessValue <= evolutionParams.targetFitnessValue) {
             terminationReason = TerminationReason::targetFitnessValueReached;

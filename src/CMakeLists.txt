@@ -5,6 +5,7 @@ add_subdirectory(params)
 add_subdirectory(genesis)
 add_subdirectory(experiments)
 add_subdirectory(evolution)
+add_subdirectory(util)
 
 macro(add_link_includes_for_target _target_name)
     target_link_libraries(${_target_name} PRIVATE nlohmann_json::nlohmann_json libcmaes::cmaes

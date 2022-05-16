@@ -7,7 +7,8 @@ namespace soft_npu {
 enum class TerminationReason {
     targetFitnessValueReached,
     maxNumIterationsReached,
-    timeLimitPassed
+    timeLimitPassed,
+    interruptSignalReceived
 };
 
 std::string toString(TerminationReason terminationReason);
