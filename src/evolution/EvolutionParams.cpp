@@ -13,7 +13,9 @@ plog::Record& operator<<(plog::Record& record, const EvolutionParams& evolutionP
         << "Min mutation strength: " << evolutionParams.minMutationStrength << std::endl
         << "Max mutation strength: " << evolutionParams.maxMutationStrength << std::endl
         << "Crossover probability: " << evolutionParams.crossoverProbability << std::endl
-        << "Tournament selection probability: " << evolutionParams.tournamentSelectionProbability;
+        << "Tournament selection probability: " << evolutionParams.tournamentSelectionProbability << std::endl
+        << "Result extraction num evaluation seeds: " << evolutionParams.resultExtractionNumEvalSeeds << std::endl
+        << "Result extraction num candidates: " << evolutionParams.resultExtractionNumCandidates << std::endl;
 
     return record;
 }

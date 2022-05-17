@@ -17,6 +17,8 @@ TEST(EvolutionTest, SimpleOptimizationProblem) {
     evolutionParams.maxMutationStrength = 0.45;
     evolutionParams.crossoverProbability = 0.5;
     evolutionParams.tournamentSelectionProbability = 0.75;
+    evolutionParams.resultExtractionNumEvalSeeds = 5;
+    evolutionParams.resultExtractionNumCandidates = 5;
 
     auto geneInfoJson = R"(
 
