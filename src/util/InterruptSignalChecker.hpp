@@ -1,4 +1,5 @@
 #pragma once
+#include <atomic>
 
 namespace soft_npu {
 class InterruptSignalChecker {
@@ -9,7 +10,8 @@ private:
     static void secondInterruptHandler(int);
     struct State {
         State();
-        bool interruptSignalReceived;
+        std::atomic<bool> interruptSignalReceived;
+        static_assert(std::atomic<bool>::is_always_lock_free);
     };
 
     static State state;

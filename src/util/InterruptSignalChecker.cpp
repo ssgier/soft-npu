@@ -7,7 +7,7 @@ namespace soft_npu {
 InterruptSignalChecker::State InterruptSignalChecker::state;
 
 bool InterruptSignalChecker::wasSent() {
-    return state.interruptSignalReceived;
+    return state.interruptSignalReceived.load();
 }
 
 void InterruptSignalChecker::secondInterruptHandler(int sig) {
@@ -19,7 +19,7 @@ void InterruptSignalChecker::secondInterruptHandler(int sig) {
 void InterruptSignalChecker::firstInterruptHandler(int sig) {
     if (sig == SIGINT) {
         PLOG_INFO << "Interrupt signal received";
-        state.interruptSignalReceived = true;
+        state.interruptSignalReceived.store(true);
         signal(SIGINT, InterruptSignalChecker::secondInterruptHandler);
     }    
 }
