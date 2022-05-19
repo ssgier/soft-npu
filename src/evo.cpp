@@ -17,7 +17,7 @@ void runEvolution(const std::string& paramsTemplatePath) {
     PLOG_INFO << "Running evolution, params template file path: " << paramsTemplatePath;
 
     auto paramsTemplate = ParamsType::parse(FileUtil::getFileContent(
-        "../resources/paramsTemplate.json"));
+        paramsTemplatePath));
 
     auto geneInfoTemplate = ParamsType::parse(FileUtil::getFileContent(
         "../resources/geneInfoTemplate.json"));
