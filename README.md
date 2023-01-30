@@ -1,6 +1,6 @@
 # soft-npu
 *soft-npu* (software-based neural processing unit) is an event-driven framework for processing dynamics of spiking neural networks (SNNs).
-This project is in early stage of development.
+This project served as a proof of concept for some of my newer projects.
 
 ## Key Features
 
